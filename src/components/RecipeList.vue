@@ -55,6 +55,7 @@ h4 {
   font-size: 0.9rem;
   color: var(--text-light);
   display: -webkit-box;
+  line-clamp: 3;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
