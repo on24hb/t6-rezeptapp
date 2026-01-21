@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import RecipeList from '../components/RecipeList.vue'
-import AddRecipe from '../components/AddREcipe.vue'
+import AddRecipe from '../components/AddRecipe.vue'
 </script>
 
 <template>

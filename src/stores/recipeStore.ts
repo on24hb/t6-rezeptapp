@@ -5,8 +5,7 @@ import {
   addDoc, 
   onSnapshot, 
   query, 
-  orderBy,
-  type DocumentData 
+  orderBy
 } from 'firebase/firestore';
 import type { Recipe } from '../types/Recipe';
 import { ref } from 'vue';
