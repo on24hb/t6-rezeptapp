@@ -1,35 +1,48 @@
-@import './base.css';
+/* Fix für das Box-Modell (verhindert Überstehen von Inputs) */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
 
-#app {
-  max-width: 1280px;
+:root {
+  --primary-color: #424cb8; /* Dein altes Blau */
+  --secondary-color: #516881;
+  --background-color: #fdfdfd;
+  --card-background: #ffffff;
+  --text-color: #1f1f1f;
+  --text-light: #4b4b4b;
+  --border-color: #eeeeee;
+  --box-shadow: rgba(15, 15, 15, 0.05) 0px 1px 2px, rgba(15, 15, 15, 0.1) 0px 0px 1px;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family:
+    system-ui,
+    -apple-system,
+    sans-serif;
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
+.app-container {
+  max-width: 900px;
   margin: 0 auto;
-  padding: 2rem;
-  font-weight: normal;
+  padding: 1rem;
 }
 
-a,
-.green {
-  text-decoration: none;
-  color: hsla(160, 100%, 37%, 1);
-  transition: 0.4s;
-  padding: 3px;
+/* Hilfsklassen für Abstände */
+.mt-2 {
+  margin-top: 2rem;
+}
+.mb-2 {
+  margin-bottom: 2rem;
 }
 
-@media (hover: hover) {
-  a:hover {
-    background-color: hsla(160, 100%, 37%, 0.2);
-  }
-}
-
-@media (min-width: 1024px) {
-  body {
-    display: flex;
-    place-items: center;
-  }
-
-  #app {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    padding: 0 2rem;
-  }
+h2 {
+  color: var(--secondary-color);
+  margin-bottom: 1rem;
+  font-size: 1.3rem;
 }

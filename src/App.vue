@@ -1,79 +1,74 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
-
 </script>
 
 <template>
-  <header>
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
+  <div class="app-layout">
+    <header class="app-bar">
+      <div class="brand">
+        <img alt="Logo" class="logo" src="../logo.png" width="32" height="32" />
+        <span class="app-title">RezeptBuddy</span>
+      </div>
+      <nav class="nav-links">
+        <RouterLink to="/" class="nav-item">Meine Rezepte</RouterLink>
+        <RouterLink to="/add-recipe" class="nav-item btn-add">＋ Neues Rezept</RouterLink>
       </nav>
-  </header>
+    </header>
 
-  <RouterView />
+    <main class="app-container">
+      <RouterView />
+    </main>
+  </div>
 </template>
 
 <style scoped>
-header {
-  line-height: 1.5;
-  max-height: 100vh;
+.app-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1.5rem;
+  background-color: var(--card-background);
+  border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-nav {
-  width: 100%;
-  font-size: 12px;
-  text-align: center;
-  margin-top: 2rem;
+.app-title {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--primary-color);
+  letter-spacing: -0.5px;
 }
 
-nav a.router-link-exact-active {
-  color: var(--color-text);
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
 }
 
-nav a.router-link-exact-active:hover {
-  background-color: transparent;
+.nav-item {
+  text-decoration: none;
+  color: var(--text-light);
+  font-size: 0.95rem;
+  font-weight: 500;
 }
 
-nav a {
-  display: inline-block;
-  padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
+.router-link-active:not(.btn-add) {
+  color: var(--primary-color);
 }
 
-nav a:first-of-type {
-  border: 0;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-
-  nav {
-    text-align: left;
-    margin-left: -1rem;
-    font-size: 1rem;
-
-    padding: 1rem 0;
-    margin-top: 1rem;
-  }
+.btn-add {
+  background-color: var(--primary-color);
+  color: white !important;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
 }
 </style>
