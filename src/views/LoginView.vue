@@ -1,26 +1,46 @@
 <script setup lang="ts">
 import { useAuthStore } from '@/stores/authStore'
+import { useRouter } from 'vue-router'
+
 const authStore = useAuthStore()
+const router = useRouter()
+
+// Funktion für Google Login mit anschließender Weiterleitung
+const handleGoogleLogin = async () => {
+  await authStore.loginWithGoogle()
+  // Wenn der Login erfolgreich war, ab zur Home-Seite
+  if (authStore.user) {
+    router.push('/')
+  }
+}
+
+// Funktion für Gast-Login mit anschließender Weiterleitung
+const handleGuestLogin = async () => {
+  await authStore.loginAsGuest()
+  if (authStore.user) {
+    router.push('/')
+  }
+}
 </script>
 
 <template>
   <div class="login-page">
     <div class="login-card">
       <div class="logo-circle">
-        <img src="../assets/logo.png" class="login-logo" alt="Logo" width="64" />
+        <img src="../../public/manifest-icon-192.maskable.png" class="login-logo" alt="Logo" width="64" />
       </div>
       <h1>RezeptBuddy</h1>
       <p>Deine Rezepte, immer dabei.</p>
 
       <div class="actions">
-        <button @click="authStore.loginWithGoogle" class="btn-google-large">
+        <button @click="handleGoogleLogin" class="btn-google-large">
           <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20" />
           Mit Google anmelden
         </button>
 
         <div class="divider"><span>oder</span></div>
 
-        <button @click="authStore.loginAsGuest" class="btn-guest">
+        <button @click="handleGuestLogin" class="btn-guest">
           Als Gast fortfahren
         </button>
       </div>
@@ -29,12 +49,19 @@ const authStore = useAuthStore()
 </template>
 
 <style scoped>
+h1 {
+  margin-bottom: 0rem;
+}
+p {
+  color: #666;
+  margin-bottom: 2rem;
+}
+
 .login-page {
   height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
 }
 .login-card {
   background: white;

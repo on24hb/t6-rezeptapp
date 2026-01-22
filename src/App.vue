@@ -1,10 +1,14 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
+import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 
 const authStore = useAuthStore()
+const route = useRoute()
+const router = useRouter()
 const isMenuOpen = ref(false)
+
+const isNotLoginPage = computed(() => route.name !== 'login')
 
 const toggleMenu = () => {
   isMenuOpen.value = !isMenuOpen.value
@@ -13,13 +17,22 @@ const toggleMenu = () => {
 const closeMenu = () => {
   isMenuOpen.value = false
 }
+
+// Neues Logout-Verhalten: warte auf logout und navigiere dann zur Login-Seite
+const handleLogout = async () => {
+  const ok = await authStore.logout()
+  closeMenu()
+  if (ok) {
+    router.push({ name: 'login' })
+  }
+}
 </script>
 
 <template>
   <div class="app-layout">
-    <header class="app-bar">
+    <header class="app-bar" v-if="authStore.user && isNotLoginPage">
       <div class="brand">
-        <img alt="Logo" class="logo" src="../logo.png" width="32" height="32" />
+        <img alt="Logo" class="logo" src="../../public/manifest-icon-192.maskable.png" width="32" height="32" />
         <span class="app-title">RezeptBuddy</span>
       </div>
 
@@ -35,7 +48,7 @@ const closeMenu = () => {
             <span class="user-status">
               👤 {{ authStore.user?.isAnonymous ? 'Gast-Nutzer' : authStore.user?.email }}
             </span>
-            <button @click="() => {authStore.logout(); closeMenu(); }" class="btn-secondary">Abmelden</button>
+            <button @click="handleLogout" class="btn-secondary">Abmelden</button>
         </div>
 
         <RouterLink to="/add-recipe" class="nav-item btn-add" @click="closeMenu">
