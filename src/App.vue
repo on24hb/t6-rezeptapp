@@ -15,7 +15,13 @@ const authStore = useAuthStore()
       <nav class="nav-links">
 
       <div class="auth-section">
-          <template v-if="authStore.user">
+          <!-- If auth status is still loading, show a subtle loader instead of the login button -->
+          <template v-if="authStore.isLoading">
+            <div class="loading-dots" aria-hidden="true">
+              <span></span><span></span><span></span>
+            </div>
+          </template>
+          <template v-else-if="authStore.user">
             <span class="user-status">👤 {{ authStore.user.isAnonymous ? 'Gast-Nutzer' : authStore.user.email }}</span>
             <button @click="authStore.logout" class="btn-secondary">Abmelden</button>
           </template>
@@ -96,6 +102,31 @@ const authStore = useAuthStore()
   margin-right: 1rem;
   padding-right: 1rem;
   border-right: 1px solid var(--border-color);
+}
+
+/* small three-dot loader used while auth status is determined */
+.loading-dots {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  padding: 6px 8px;
+}
+.loading-dots span {
+  width: 6px;
+  height: 6px;
+  background: var(--text-light);
+  border-radius: 50%;
+  display: inline-block;
+  opacity: 0.25;
+  transform: translateY(0);
+  animation: dot 1s infinite linear;
+}
+.loading-dots span:nth-child(2) { animation-delay: 0.15s }
+.loading-dots span:nth-child(3) { animation-delay: 0.3s }
+@keyframes dot {
+  0% { opacity: 0.25; transform: translateY(0); }
+  50% { opacity: 1; transform: translateY(-4px); }
+  100% { opacity: 0.25; transform: translateY(0); }
 }
 
 .user-status {

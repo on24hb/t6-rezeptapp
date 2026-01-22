@@ -23,7 +23,18 @@ watch(
 
 <template>
   <div class="list-wrapper">
-    <div v-if="authStore.user && recipeStore.recipes.length === 0" class="status-msg">
+    <!-- Show skeletons while auth or recipes are loading -->
+    <div v-if="authStore.isLoading || (recipeStore.loading && recipeStore.recipes.length === 0)" class="skeleton-grid">
+      <div v-for="n in 6" :key="n" class="skeleton-card">
+        <div class="skeleton-title"></div>
+        <div class="skeleton-line short"></div>
+        <div class="skeleton-line"></div>
+        <div class="skeleton-line"></div>
+        <div class="skeleton-button"></div>
+      </div>
+    </div>
+
+    <div v-else-if="authStore.user && recipeStore.recipes.length === 0" class="status-msg">
       Noch keine Rezepte vorhanden. Leg gleich eins an!
     </div>
 
@@ -42,6 +53,60 @@ watch(
 </template>
 
 <style scoped>
+
+
+/* Skeleton styles */
+.skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.skeleton-card {
+  background: linear-gradient(90deg, var(--card-background), #f6f7f8);
+  border: 1px solid var(--border-color);
+  padding: 1.25rem;
+  border-radius: 10px;
+  box-shadow: var(--box-shadow);
+  min-height: 140px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  overflow: hidden;
+}
+
+.skeleton-title,
+.skeleton-line,
+.skeleton-button {
+  background: linear-gradient(90deg, #eee 25%, #f5f5f5 50%, #eee 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.2s linear infinite;
+  border-radius: 6px;
+}
+
+.skeleton-title {
+  width: 70%;
+  height: 18px;
+}
+
+.skeleton-line {
+  height: 10px;
+}
+
+.skeleton-line.short {
+  width: 50%;
+}
+
+.skeleton-button {
+  margin-top: auto;
+  width: 30%;
+  height: 14px;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
 
 .status-msg {
   text-align: center;
