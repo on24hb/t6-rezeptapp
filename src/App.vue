@@ -33,7 +33,6 @@ const authStore = useAuthStore()
           </template>
         </div>
 
-        <RouterLink to="/" class="nav-item">Meine Rezepte</RouterLink>
         <RouterLink to="/add-recipe" class="nav-item btn-add">＋ Neues Rezept</RouterLink>
       </nav>
     </header>

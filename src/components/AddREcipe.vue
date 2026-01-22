@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { useRecipeStore } from '@/stores/recipeStore'
 import { AVAILABLE_TAGS } from '@/tags'
 
 const emit = defineEmits(['saved'])
+const router = useRouter()
 
 const store = useRecipeStore()
 const title = ref('')
@@ -28,6 +30,10 @@ const submit = async () => {
   ingredients.value = ''
   instructions.value = ''
   selectedTags.value = []
+}
+
+const handleCancel = () => {
+  router.push('/')
 }
 </script>
 
@@ -64,7 +70,10 @@ const submit = async () => {
           </div>
         </div>
 
-        <button class="save-button" type="submit">Speichern</button>
+        <div class="button-group">
+          <button class="save-button" type="submit">Speichern</button>
+          <button class="cancel-button" type="button" @click="handleCancel">Abbrechen</button>
+        </div>
       </form>
     </div>
   </div>
@@ -72,35 +81,35 @@ const submit = async () => {
 
 <style scoped>
 .page-title {
-  margin-bottom: 2.5rem; /* Viel Abstand unter der Überschrift */
-  color: var(--secondary-color);
+  margin-bottom: 2.5rem;
+  color: #333;
 }
 
 .card {
   background: white;
-  padding: 2.5rem; /* Mehr Innenabstand */
+  padding: 2.5rem;
   border-radius: 12px;
-  box-shadow: var(--box-shadow);
-  border: 1px solid var(--border-color);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #ddd;
 }
 
 .form-group {
-  margin-bottom: 2rem; /* Mehr Platz zwischen den Eingabefeldern */
+  margin-bottom: 2rem;
 }
 
 label {
   display: block;
-  margin-bottom: 0.75rem; /* Mehr Abstand zwischen Label und Input */
+  margin-bottom: 0.75rem;
   font-weight: 600;
   font-size: 0.9rem;
-  color: var(--text-light);
+  color: #666;
 }
 
 input,
 textarea {
   width: 100%;
   padding: 1rem;
-  border: 1.5px solid var(--border-color);
+  border: 1.5px solid #ddd;
   border-radius: 8px;
   font-size: 1rem;
   font-family: inherit;
@@ -110,27 +119,58 @@ textarea {
 input:focus,
 textarea:focus {
   outline: none;
-  border-color: var(--primary-color);
+  border-color: #4CAF50;
   background-color: #fff;
 }
 
-.save-button {
-  width: 100%;
+form {
+  display: flex;
+  flex-direction: column;
+}
+
+.save-button,
+.cancel-button {
   padding: 0.8rem;
-  background-color: var(--primary-color);
   color: white;
   border: none;
   border-radius: 8px;
   font-weight: 500;
   font-size: 1rem;
   cursor: pointer;
+  flex: 1;
+}
+
+.save-button {
+  background-color: #8873e6;
+  margin-right: 0.5rem;
   margin-top: 1rem;
 }
+
+.save-button:hover {
+  background-color: #7e6ad6;
+}
+
+.cancel-button {
+  background-color: #4868d1;
+  margin-top: 1rem;
+}
+
+.cancel-button:hover {
+  background-color: #405cb8;
+}
+
+.button-group {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
 .tags-selection {
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
 }
+
 .checkbox-label {
   display: flex;
   align-items: center;
