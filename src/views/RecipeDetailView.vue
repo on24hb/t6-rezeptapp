@@ -13,14 +13,10 @@
         <p>{{ recipe.instructions }}</p>
       </div>
 
-      <div class="section" v-if="recipe.createdAt">
-        <small>Erstellt am: {{ new Date(recipe.createdAt).toLocaleDateString('de-DE') }}</small>
-      </div>
-
       <div class="actions">
         <router-link :to="`/edit/${recipe.id}`" class="btn btn-edit">Bearbeiten</router-link>
         <button @click="confirmDelete" class="btn btn-delete">Löschen</button>
-        <router-link to="/recipes" class="btn btn-back">Zurück</router-link>
+        <router-link to="/" class="btn btn-back">Zurück</router-link>
       </div>
     </div>
     <div v-else>
@@ -90,17 +86,17 @@ const confirmDelete = async () => {
 }
 
 .btn-edit {
-  background: #4CAF50;
+  background: #3857bd;
   color: white;
 }
 
 .btn-delete {
-  background: #f44336;
-  color: white;
+  background: #eb93e6;
+  color: rgb(255, 255, 255);
 }
 
 .btn-back {
-  background: #2196F3;
+  background: #7cb9eb;
   color: white;
 }
 </style>
