@@ -34,7 +34,12 @@ const authStore = useAuthStore()
         </div>
 
         <RouterLink to="/" class="nav-item">Meine Rezepte</RouterLink>
-        <RouterLink to="/add-recipe" class="nav-item btn-add">＋ Neues Rezept</RouterLink>
+        <RouterLink v-if="authStore.user" to="/add-recipe" class="nav-item btn-add">＋ Neues Rezept</RouterLink>
+        <span v-else
+          class="nav-item btn-add btn-disabled"
+          title="Bitte melde dich an, um Rezepte zu erstellen">
+         ＋ Neues Rezept
+        </span>
       </nav>
     </header>
 
@@ -45,6 +50,14 @@ const authStore = useAuthStore()
 </template>
 
 <style scoped>
+.btn-disabled {
+  background-color: #ccc !important; 
+  color: #888 !important;
+  cursor: not-allowed;
+  filter: grayscale(1);
+  opacity: 0.6;
+}
+
 .app-bar {
   display: flex;
   justify-content: space-between;
