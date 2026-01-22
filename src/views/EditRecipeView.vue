@@ -1,7 +1,7 @@
 <template>
   <div class="edit-recipe">
     <h1>Rezept bearbeiten</h1>
-    
+
     <form @submit.prevent="saveRecipe" v-if="formData">
       <div class="form-group">
         <label for="title">Rezeptname</label>
@@ -20,37 +20,55 @@
 
       <div class="actions">
         <button type="submit" class="btn btn-save">Speichern</button>
-        <router-link :to="`/recipe/${recipe.id}`" class="btn btn-cancel">Abbrechen</router-link>
+        <router-link :to="cancelUrl" class="btn btn-cancel">Abbrechen</router-link>
       </div>
     </form>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useRecipeStore } from '@/stores/recipeStore'
+import type { Recipe } from '@/types/Recipe'
 
 const route = useRoute()
 const router = useRouter()
 const recipeStore = useRecipeStore()
-const recipe = ref<any>(null)
-const formData = ref<any>(null)
+// typed refs instead of any
+const recipe = ref<Recipe | null>(null)
+const formData = ref<Partial<Recipe> | null>(null)
 
-onMounted(() => {
+const cancelUrl = computed(() => `/`)
+
+onMounted(async () => {
   const recipeId = route.params.id as string
-  recipe.value = recipeStore.recipes.find(r => r.id === recipeId)
-  
-  if (recipe.value) {
-    formData.value = { ...recipe.value }
+  // try to find in store
+  let found = recipeStore.recipes.find((r) => r.id === recipeId)
+  if (!found) {
+    // try one-time fetch as fallback
+    await recipeStore.fetchRecipesOnce()
+    found = recipeStore.recipes.find((r) => r.id === recipeId)
+  }
+
+  if (found) {
+    recipe.value = found
+    // create a shallow copy for the form
+    formData.value = { ...found }
+  } else {
+    // redirect if not found
+    router.replace('/')
   }
 })
 
 const saveRecipe = async () => {
+  if (!recipe.value || !formData.value || !recipe.value.id) return
+
   try {
-    await recipeStore.updateRecipe(recipe.value.id, formData.value)
+    await recipeStore.updateRecipe(recipe.value.id, formData.value as Partial<Recipe>)
     router.push(`/recipe/${recipe.value.id}`)
-  } catch (error) {
+  } catch (err) {
+    console.error('Save error', err)
     alert('Fehler beim Speichern des Rezepts')
   }
 }

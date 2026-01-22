@@ -5,4 +5,5 @@ export interface Recipe {
   instructions: string;
   createdAt: Date;
   tags?: string[];
+  userId?: string;
 }

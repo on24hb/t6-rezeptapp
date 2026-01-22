@@ -1,0 +1,48 @@
+import { defineStore } from 'pinia';
+import { ref } from 'vue';
+import { auth } from '../../firebase';
+import { useRecipeStore } from './recipeStore';
+import {
+  onAuthStateChanged,
+  signOut,
+  type User,
+  signInWithPopup,
+  GoogleAuthProvider
+} from 'firebase/auth';
+
+export const useAuthStore = defineStore('authStore', () => {
+  const user = ref<User | null>(null);
+  const isLoading = ref(true);
+
+  // Status-Überwachung beim Start der App
+  onAuthStateChanged(auth, (firebaseUser) => {
+    user.value = firebaseUser;
+    isLoading.value = false;
+  });
+
+  // Google Login Funktion
+  async function loginWithGoogle() {
+    const provider = new GoogleAuthProvider();
+    try {
+      const result = await signInWithPopup(auth, provider);
+      console.log("Erfolgreich angemeldet:", result.user.displayName);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error("Fehler beim Google Login:", error.message);
+      }
+    }
+  }
+
+  async function logout() {
+    const recipeStore = useRecipeStore();
+    try {
+      await signOut(auth);
+      user.value = null;
+      recipeStore.clearRecipes();
+    } catch (error: unknown) {
+      console.error("Logout Fehler:", error);
+    }
+  }
+
+  return { user, isLoading, logout, loginWithGoogle };
+});

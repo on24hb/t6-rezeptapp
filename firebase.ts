@@ -3,6 +3,7 @@ import { initializeApp } from 'firebase/app'
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 import { getFirestore } from 'firebase/firestore'
+import { getAuth } from "firebase/auth";
 
 // Firebase configuration is loaded from environment variables (Vite requires VITE_ prefix)
 const firebaseConfig = {
@@ -27,5 +28,8 @@ const app = initializeApp(firebaseConfig)
 // Firestore mit der App-Instanz verknüpfen
 const db = getFirestore(app)
 
+// Authentifizierung mit der App-Instanz verknüpfen
+const auth = getAuth(app);
+
 // Exportieren
-export { db }
+export { db, auth }

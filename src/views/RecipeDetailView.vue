@@ -2,7 +2,7 @@
   <div class="recipe-detail">
     <div v-if="recipe" class="detail-container">
       <h1>{{ recipe.title }}</h1>
-      
+
       <div class="section">
         <h2>Zutaten</h2>
         <p>{{ recipe.ingredients }}</p>
@@ -29,23 +29,36 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useRecipeStore } from '@/stores/recipeStore'
+import type { Recipe } from '@/types/Recipe'
 
 const route = useRoute()
 const router = useRouter()
 const recipeStore = useRecipeStore()
-const recipe = ref<any>(null)
+const recipe = ref<Recipe | null>(null)
 
-onMounted(() => {
+onMounted(async () => {
   const recipeId = route.params.id as string
-  recipe.value = recipeStore.recipes.find(r => r.id === recipeId)
+  let found = recipeStore.recipes.find(r => r.id === recipeId)
+  if (!found) {
+    // fallback: try a one-time fetch in case store wasn't populated
+    await recipeStore.fetchRecipesOnce()
+    found = recipeStore.recipes.find(r => r.id === recipeId)
+  }
+
+  if (found) {
+    recipe.value = found
+  }
 })
 
 const confirmDelete = async () => {
+  if (!recipe.value?.id) return
+
   if (confirm('Möchtest du dieses Rezept wirklich löschen?')) {
     try {
       await recipeStore.deleteRecipe(recipe.value.id)
       router.push('/')
-    } catch (error) {
+    } catch (err) {
+      console.error('Delete error', err)
       alert('Fehler beim Löschen des Rezepts')
     }
   }
