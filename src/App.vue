@@ -32,7 +32,7 @@ const handleLogout = async () => {
   <div class="app-layout">
     <header class="app-bar" v-if="authStore.user && isNotLoginPage">
       <div class="brand">
-        <img alt="Logo" class="logo" src="../../public/manifest-icon-192.maskable.png" width="32" height="32" />
+        <img alt="Logo" class="logo" src="../logo.png" width="32" height="32" />
         <span class="app-title">RezeptBuddy</span>
       </div>
 

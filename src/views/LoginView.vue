@@ -27,7 +27,7 @@ const handleGuestLogin = async () => {
   <div class="login-page">
     <div class="login-card">
       <div class="logo-circle">
-        <img src="../../public/manifest-icon-192.maskable.png" class="login-logo" alt="Logo" width="64" />
+        <img src="../../logo.png" class="login-logo" alt="Logo" width="64" />
       </div>
       <h1>RezeptBuddy</h1>
       <p>Deine Rezepte, immer dabei.</p>
