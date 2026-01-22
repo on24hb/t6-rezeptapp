@@ -20,17 +20,18 @@ onMounted(() => {
     <div v-if="!props.recipes && store.loading">Rezepte werden geladen...</div>
 
     <div v-else class="simple-grid">
-      <div 
+      <router-link
         v-for="recipe in (props.recipes || store.recipes)" 
-        :key="recipe.id" 
+        :key="recipe.id"
+        :to="`/recipe/${recipe.id}`"
         class="recipe-card"
-      >
+    
         <h4>{{ recipe.title }}</h4>
         <RecipeTags :tags="recipe.tags" />
         
         <p class="preview">{{ recipe.instructions }}</p>
         <button class="btn-link">Anzeigen →</button>
-      </div>
+      </router-link>
     </div>
   </div>
 </template>
@@ -51,6 +52,8 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   transition: transform 0.2s ease;
+  text-decoration: none;
+  color: inherit;
 }
 
 .recipe-card:hover {
