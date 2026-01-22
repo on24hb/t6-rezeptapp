@@ -44,7 +44,7 @@ const confirmDelete = async () => {
   if (confirm('Möchtest du dieses Rezept wirklich löschen?')) {
     try {
       await recipeStore.deleteRecipe(recipe.value.id)
-      router.push('/recipes')
+      router.push('/')
     } catch (error) {
       alert('Fehler beim Löschen des Rezepts')
     }
