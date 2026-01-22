@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRecipeStore } from '@/stores/recipeStore'
+import { AVAILABLE_TAGS } from '@/tags'
 
 const store = useRecipeStore()
 const title = ref('')
 const ingredients = ref('')
 const instructions = ref('')
+const selectedTags = ref<string[]>([])
 
 const submit = async () => {
   if (!title.value) return
@@ -13,12 +15,14 @@ const submit = async () => {
     title: title.value,
     ingredients: ingredients.value,
     instructions: instructions.value,
+    tags: selectedTags.value,
     createdAt: new Date(),
   })
   // Felder leeren
   title.value = ''
   ingredients.value = ''
   instructions.value = ''
+  selectedTags.value = []
 }
 </script>
 
@@ -43,6 +47,16 @@ const submit = async () => {
             rows="8"
             placeholder="Schritt für Schritt Anleitung..."
           ></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Kategorien</label>
+          <div class="tags-selection">
+            <label v-for="tag in AVAILABLE_TAGS" :key="tag" class="checkbox-label">
+              <input type="checkbox" :value="tag" v-model="selectedTags">
+              {{ tag }}
+            </label>
+          </div>
         </div>
 
         <button class="save-button" type="submit">Speichern</button>
@@ -106,5 +120,17 @@ textarea:focus {
   font-size: 1rem;
   cursor: pointer;
   margin-top: 1rem;
+}
+.tags-selection {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-weight: normal;
+  cursor: pointer;
 }
 </style>

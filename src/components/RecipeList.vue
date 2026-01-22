@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted } from 'vue';
 import { useRecipeStore } from '@/stores/recipeStore';
+import RecipeTags from './RecipeTags.vue';
 
 const store = useRecipeStore();
 
@@ -16,6 +17,7 @@ onMounted(() => {
     <div v-else class="simple-grid">
       <div v-for="recipe in store.recipes" :key="recipe.id" class="recipe-card">
         <h4>{{ recipe.title }}</h4>
+        <RecipeTags :tags="recipe.tags" />
         <p class="preview">{{ recipe.instructions }}</p>
         <button class="btn-link">Anzeigen →</button>
       </div>
