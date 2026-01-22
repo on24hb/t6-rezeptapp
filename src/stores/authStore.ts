@@ -7,7 +7,8 @@ import {
   signOut,
   type User,
   signInWithPopup,
-  GoogleAuthProvider
+  GoogleAuthProvider,
+  signInAnonymously
 } from 'firebase/auth';
 
 export const useAuthStore = defineStore('authStore', () => {
@@ -19,6 +20,15 @@ export const useAuthStore = defineStore('authStore', () => {
     user.value = firebaseUser;
     isLoading.value = false;
   });
+
+  // Gast-Login (Anonym)
+  async function loginAsGuest() {
+    try {
+      await signInAnonymously(auth)
+    } catch (error) {
+      console.error("Gast-Login Fehler:", error)
+    }
+  }
 
   // Google Login Funktion
   async function loginWithGoogle() {
@@ -44,5 +54,5 @@ export const useAuthStore = defineStore('authStore', () => {
     }
   }
 
-  return { user, isLoading, logout, loginWithGoogle };
+  return { user, isLoading, logout, loginWithGoogle, loginAsGuest };
 });
