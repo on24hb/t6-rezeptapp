@@ -27,6 +27,7 @@ type FirestoreRecipe = {
   createdAt: Timestamp | { seconds: number; nanoseconds: number } | Date | null;
   tags?: string[];
   userId?: string;
+  isFavorite?: boolean;
 };
 
 function isSecondsObject(obj: unknown): obj is { seconds: number } {
@@ -52,7 +53,8 @@ function mapFirestoreDocToRecipe(id: string, data: FirestoreRecipe): Recipe {
     instructions: data.instructions,
     createdAt,
     tags: data.tags || [],
-    userId: data.userId
+    userId: data.userId,
+    isFavorite: data.isFavorite || false
   };
 }
 
@@ -131,6 +133,7 @@ export const useRecipeStore = defineStore('recipeStore', () => {
         ...recipe,
         tags: recipe.tags || [],
         userId: auth.currentUser.uid,
+        isFavorite: false,
         // Serverseitiger Timestamp verhindert Typ-Mischungen
         createdAt: serverTimestamp()
       });
@@ -151,6 +154,7 @@ export const useRecipeStore = defineStore('recipeStore', () => {
       if (updates.createdAt !== undefined) payload.createdAt = updates.createdAt;
       if (updates.tags !== undefined) payload.tags = updates.tags;
       if (updates.userId !== undefined) payload.userId = updates.userId;
+      if (updates.isFavorite !== undefined) payload.isFavorite = updates.isFavorite;
 
       // Cast once to the Firestore UpdateData type when calling the SDK
       await updateDoc(recipeRef, payload as UpdateData<DocumentData>);
@@ -166,6 +170,7 @@ export const useRecipeStore = defineStore('recipeStore', () => {
         if (updates.createdAt !== undefined) updated.createdAt = updates.createdAt as Date;
         if (updates.tags !== undefined) updated.tags = updates.tags;
         if (updates.userId !== undefined) updated.userId = updates.userId;
+        if (updates.isFavorite !== undefined) updated.isFavorite = updates.isFavorite;
         recipes.value[index] = updated;
       }
     } catch (error) {
@@ -194,6 +199,14 @@ export const useRecipeStore = defineStore('recipeStore', () => {
     recipes.value = [];
   };
 
+  // Favorit-Status Toggle
+  const toggleFavorite = async (id: string) => {
+    const recipe = recipes.value.find((r) => r.id === id);
+    if (!recipe) return;
+
+    await updateRecipe(id, { isFavorite: !recipe.isFavorite });
+  };
+
   return {
     recipes,
     loading,
@@ -202,6 +215,7 @@ export const useRecipeStore = defineStore('recipeStore', () => {
     addRecipe,
     updateRecipe,
     deleteRecipe,
-    clearRecipes
+    clearRecipes,
+    toggleFavorite
   };
 });

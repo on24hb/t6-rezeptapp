@@ -1,7 +1,17 @@
 <template>
   <div class="recipe-detail">
     <div v-if="recipe" class="detail-container">
-      <h1>{{ recipe.title }}</h1>
+      <div class="title-section">
+        <h1>{{ recipe.title }}</h1>
+        <button
+          @click="toggleFavorite"
+          class="favorite-btn-detail"
+          :class="{ 'is-favorite': recipe.isFavorite }"
+          :title="recipe.isFavorite ? 'Aus Favoriten entfernen' : 'Zu Favoriten hinzufügen'"
+        >
+          ❤️
+        </button>
+      </div>
 
       <div class="section">
         <h2>Zutaten</h2>
@@ -63,6 +73,20 @@ const confirmDelete = async () => {
     }
   }
 }
+
+const toggleFavorite = async () => {
+  if (!recipe.value?.id) return
+  
+  try {
+    await recipeStore.toggleFavorite(recipe.value.id)
+    // Update local ref
+    if (recipe.value) {
+      recipe.value.isFavorite = !recipe.value.isFavorite
+    }
+  } catch (err) {
+    console.error('Error toggling favorite:', err)
+  }
+}
 </script>
 
 <style scoped>
@@ -73,6 +97,39 @@ const confirmDelete = async () => {
 .detail-container {
   max-width: 800px;
   margin: 0 auto;
+}
+
+.title-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+h1 {
+  margin: 0;
+  flex: 1;
+}
+
+.favorite-btn-detail {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  cursor: pointer;
+  padding: 0;
+  opacity: 0.5;
+  transition: opacity 0.2s ease;
+  flex-shrink: 0;
+}
+
+.favorite-btn-detail:hover {
+  opacity: 0.8;
+}
+
+.favorite-btn-detail.is-favorite {
+  opacity: 1;
+  color: #7c3aed;
 }
 
 .section {

@@ -9,6 +9,7 @@ store.fetchRecipes()
 
 const searchTerm = ref('')
 const filterTag = ref('')
+const filterFavorites = ref(false)
 
 const filteredRecipes = computed(() => {
   return store.recipes.filter(recipe => {
@@ -16,7 +17,9 @@ const filteredRecipes = computed(() => {
     
     const matchesTag = filterTag.value ? recipe.tags?.includes(filterTag.value) : true
     
-    return matchesSearch && matchesTag
+    const matchesFavorite = filterFavorites.value ? recipe.isFavorite : true
+    
+    return matchesSearch && matchesTag && matchesFavorite
   })
 })
 </script>
@@ -39,6 +42,15 @@ const filteredRecipes = computed(() => {
           {{ tag }}
         </option>
       </select>
+
+      <button 
+        @click="filterFavorites = !filterFavorites"
+        class="filter-btn"
+        :class="{ active: filterFavorites }"
+        :title="filterFavorites ? 'Zeige alle Rezepte' : 'Zeige nur Favoriten'"
+      >
+        ❤️ Favoriten
+      </button>
     </div>
   </header>
 
@@ -79,13 +91,15 @@ const filteredRecipes = computed(() => {
   display: flex;
   gap: 1rem;
   justify-content: center;
-  max-width: 600px;
+  max-width: 900px;
   margin-left: auto;
   margin-right: auto;
+  flex-wrap: wrap;
 }
 
 .search-input {
   flex: 1;
+  min-width: 200px;
   padding: 0.8rem;
   border: 1px solid var(--border-color);
   border-radius: 8px;
@@ -96,5 +110,26 @@ const filteredRecipes = computed(() => {
   border: 1px solid var(--border-color);
   border-radius: 8px;
   background: white;
+  min-width: 150px;
+}
+
+.filter-btn {
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.filter-btn:hover {
+  border-color: var(--primary-color);
+}
+
+.filter-btn.active {
+  background-color: #7c3aed;
+  color: white;
+  border-color: #7c3aed;
 }
 </style>

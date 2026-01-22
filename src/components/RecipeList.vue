@@ -33,6 +33,14 @@ onMounted(() => {
 });
 
 const displayedRecipes = computed(() => props.recipes ?? recipeStore.recipes);
+
+const toggleFavorite = async (e: Event, recipe: Recipe) => {
+  e.preventDefault();
+  e.stopPropagation();
+  if (recipe.id) {
+    await recipeStore.toggleFavorite(recipe.id);
+  }
+};
 </script>
 
 <template>
@@ -63,7 +71,17 @@ const displayedRecipes = computed(() => props.recipes ?? recipeStore.recipes);
         :to="`/recipe/${recipe.id}`"
         class="recipe-card"
       >
-        <h4>{{ recipe.title }}</h4>
+        <div class="recipe-header">
+          <h4>{{ recipe.title }}</h4>
+          <button
+            @click="toggleFavorite($event, recipe)"
+            class="favorite-btn"
+            :class="{ 'is-favorite': recipe.isFavorite }"
+            :aria-label="recipe.isFavorite ? 'Aus Favoriten entfernen' : 'Zu Favoriten hinzufügen'"
+          >
+            ❤️
+          </button>
+        </div>
         <RecipeTags :tags="recipe.tags" />
 
         <p class="preview">{{ recipe.instructions }}</p>
@@ -158,9 +176,38 @@ const displayedRecipes = computed(() => props.recipes ?? recipeStore.recipes);
   box-shadow: var(--box-shadow-hover);
 }
 
+.recipe-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
 h4 {
-  margin: 0 0 0.75rem 0;
+  margin: 0;
   color: var(--text-color);
+  flex: 1;
+}
+
+.favorite-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0;
+  opacity: 0.5;
+  transition: opacity 0.2s ease;
+  flex-shrink: 0;
+}
+
+.favorite-btn:hover {
+  opacity: 0.8;
+}
+
+.favorite-btn.is-favorite {
+  opacity: 1;
+  color: #7c3aed;
 }
 
 .preview {

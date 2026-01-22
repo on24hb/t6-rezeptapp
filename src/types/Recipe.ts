@@ -6,4 +6,5 @@ export interface Recipe {
   createdAt: Date;
   tags?: string[];
   userId?: string;
+  isFavorite?: boolean;
 }
