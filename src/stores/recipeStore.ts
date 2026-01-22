@@ -33,6 +33,7 @@ export const useRecipeStore = defineStore('recipeStore', () => {
     try {
       await addDoc(collection(db, 'recipes'), {
         ...recipe,
+        tags: recipe.tags || [],
         createdAt: new Date()
       });
     } catch (error) {
