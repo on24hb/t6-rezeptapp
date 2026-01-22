@@ -3,6 +3,10 @@ import { db } from '../../firebase';
 import { 
   collection, 
   addDoc, 
+  getDocs,
+  doc,
+  updateDoc,
+  deleteDoc,
   onSnapshot, 
   query, 
   orderBy
@@ -39,6 +43,32 @@ export const useRecipeStore = defineStore('recipeStore', () => {
       console.error("Fehler beim Speichern:", error);
     }
   };
+    // Bestehendes Rezept aktualisieren
+    const updateRecipe = async (id: string, updates: any) => {
+  try {
+    const recipeRef = doc(db, 'recipes', id)
+    await updateDoc(recipeRef, updates)
+    // Update local state
+    const index = recipes.value.findIndex(r => r.id === id)
+    if (index !== -1) {
+      recipes.value[index] = { ...recipes.value[index], ...updates }
+    }
+  } catch (error) {
+    console.error('Error updating recipe:', error)
+    throw error
+  }
+  };
 
-  return { recipes, loading, fetchRecipes, addRecipe };
-});
+  // Rezept löschen
+  const deleteRecipe = async (id: string) => {
+  try {
+    await deleteDoc(doc(db, 'recipes', id))
+    recipes.value = recipes.value.filter(r => r.id !== id)
+  } catch (error) {
+    console.error('Error deleting recipe:', error)
+    throw error
+  }
+};
+
+  return { recipes, loading, fetchRecipes, addRecipe, updateRecipe, deleteRecipe };
+})
