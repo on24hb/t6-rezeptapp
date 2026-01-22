@@ -104,7 +104,6 @@ const authStore = useAuthStore()
   border-right: 1px solid var(--border-color);
 }
 
-/* small three-dot loader used while auth status is determined */
 .loading-dots {
   display: inline-flex;
   gap: 6px;

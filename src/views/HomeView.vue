@@ -145,9 +145,9 @@ const filteredRecipes = computed(() => {
 }
 
 .filter-btn.active {
-  background-color: #7c3aed;
+  background-color: var(--primary-color);
   color: white;
-  border-color: #7c3aed;
+  border-color: var(--primary-color);
 }
 
 .filter-btn.active .heart-icon-filter {

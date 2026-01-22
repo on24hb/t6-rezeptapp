@@ -214,11 +214,11 @@ h4 {
 .heart-icon {
   width: 100%;
   height: 100%;
-  filter: invert(21%) sepia(51%) saturate(1344%) hue-rotate(265deg) brightness(101%) contrast(97%);
+  filter: invert(26%) sepia(54%) saturate(730%) hue-rotate(221deg) brightness(99%) contrast(91%);
 }
 
 .favorite-btn:hover .heart-icon {
-  filter: invert(21%) sepia(51%) saturate(1344%) hue-rotate(265deg) brightness(110%) contrast(97%);
+  filter: invert(26%) sepia(54%) saturate(730%) hue-rotate(221deg) brightness(108%) contrast(91%);
 }
 
 .favorite-btn.is-favorite {
@@ -226,7 +226,7 @@ h4 {
 }
 
 .favorite-btn.is-favorite .heart-icon {
-  filter: invert(21%) sepia(51%) saturate(1344%) hue-rotate(265deg) brightness(101%) contrast(97%);
+  filter: invert(26%) sepia(54%) saturate(730%) hue-rotate(221deg) brightness(99%) contrast(91%);
 }
 
 .preview {

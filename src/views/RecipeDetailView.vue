@@ -97,12 +97,17 @@ const toggleFavorite = async () => {
 
 <style scoped>
 .recipe-detail {
-  padding: 20px;
+  padding: 1rem;
 }
 
 .detail-container {
   max-width: 800px;
   margin: 0 auto;
+  background: var(--card-background);
+  padding: 2.5rem;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--box-shadow);
 }
 
 .title-section {
@@ -111,11 +116,15 @@ const toggleFavorite = async () => {
   align-items: flex-start;
   gap: 1rem;
   margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
 }
 
 h1 {
   margin: 0;
   flex: 1;
+  color: var(--primary-color);
+  font-size: 2rem;
 }
 
 .favorite-btn-detail {
@@ -136,11 +145,11 @@ h1 {
 .heart-icon-detail {
   width: 100%;
   height: 100%;
-  filter: invert(21%) sepia(51%) saturate(1344%) hue-rotate(265deg) brightness(101%) contrast(97%);
+  filter: invert(26%) sepia(54%) saturate(730%) hue-rotate(221deg) brightness(99%) contrast(91%);
 }
 
 .favorite-btn-detail:hover .heart-icon-detail {
-  filter: invert(21%) sepia(51%) saturate(1344%) hue-rotate(265deg) brightness(110%) contrast(97%);
+  filter: invert(26%) sepia(54%) saturate(730%) hue-rotate(221deg) brightness(108%) contrast(91%);
 }
 
 .favorite-btn-detail.is-favorite {
@@ -148,44 +157,76 @@ h1 {
 }
 
 .favorite-btn-detail.is-favorite .heart-icon-detail {
-  filter: invert(21%) sepia(51%) saturate(1344%) hue-rotate(265deg) brightness(101%) contrast(97%);
+  filter: invert(26%) sepia(54%) saturate(730%) hue-rotate(221deg) brightness(99%) contrast(91%);
 }
 
 .section {
-  margin: 20px 0;
+  margin: 2rem 0;
 }
 
 .section h2 {
-  margin-bottom: 10px;
+  margin: 0 0 1rem 0;
+  color: var(--secondary-color);
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.section p {
+  color: var(--text-color);
+  line-height: 1.6;
+  white-space: pre-wrap;
 }
 
 .actions {
   display: flex;
-  gap: 10px;
-  margin-top: 30px;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-color);
 }
 
 .btn {
-  padding: 10px 20px;
+  padding: 0.75rem 1.5rem;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
   text-decoration: none;
   display: inline-block;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  font-size: 0.95rem;
 }
 
 .btn-edit {
-  background: #3857bd;
+  background: var(--primary-color);
   color: white;
+}
+
+.btn-edit:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+  box-shadow: var(--box-shadow-hover);
 }
 
 .btn-delete {
-  background: #eb93e6;
-  color: rgb(255, 255, 255);
+  background: #e0a0cc;
+  color: white;
+}
+
+.btn-delete:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+  box-shadow: var(--box-shadow-hover);
 }
 
 .btn-back {
-  background: #7cb9eb;
+  background: var(--secondary-color);
   color: white;
+}
+
+.btn-back:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+  box-shadow: var(--box-shadow-hover);
 }
 </style>
