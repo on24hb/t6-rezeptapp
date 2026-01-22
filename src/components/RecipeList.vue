@@ -1,23 +1,33 @@
 <script setup lang="ts">
 import { onMounted } from 'vue';
 import { useRecipeStore } from '@/stores/recipeStore';
+import type { Recipe } from '@/types/Recipe';
 import RecipeTags from './RecipeTags.vue';
 
 const store = useRecipeStore();
 
+const props = defineProps<{
+  recipes?: Recipe[]
+}>();
+
 onMounted(() => {
-  store.fetchRecipes();
+  if (!props.recipes) store.fetchRecipes();
 });
 </script>
 
 <template>
   <div class="list-wrapper">
-    <div v-if="store.loading">Rezepte werden geladen...</div>
+    <div v-if="!props.recipes && store.loading">Rezepte werden geladen...</div>
 
     <div v-else class="simple-grid">
-      <div v-for="recipe in store.recipes" :key="recipe.id" class="recipe-card">
+      <div 
+        v-for="recipe in (props.recipes || store.recipes)" 
+        :key="recipe.id" 
+        class="recipe-card"
+      >
         <h4>{{ recipe.title }}</h4>
         <RecipeTags :tags="recipe.tags" />
+        
         <p class="preview">{{ recipe.instructions }}</p>
         <button class="btn-link">Anzeigen →</button>
       </div>
