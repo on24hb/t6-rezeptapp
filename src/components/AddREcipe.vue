@@ -3,6 +3,8 @@ import { ref } from 'vue'
 import { useRecipeStore } from '@/stores/recipeStore'
 import { AVAILABLE_TAGS } from '@/tags'
 
+const emit = defineEmits(['saved'])
+
 const store = useRecipeStore()
 const title = ref('')
 const ingredients = ref('')
@@ -18,6 +20,9 @@ const submit = async () => {
     tags: selectedTags.value,
     createdAt: new Date(),
   })
+
+  emit('saved')
+  
   // Felder leeren
   title.value = ''
   ingredients.value = ''

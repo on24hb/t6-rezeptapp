@@ -4,7 +4,6 @@ import { useRouter } from 'vue-router'
 
 const router = useRouter()
 
-// Optional: Nach dem Speichern automatisch zur Liste zurückkehren
 const handleSaved = () => {
   router.push('/')
 }
