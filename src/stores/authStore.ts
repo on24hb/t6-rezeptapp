@@ -1,11 +1,13 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { auth } from '../../firebase';
+import { useRecipeStore } from './recipeStore';
 import {
-  signInAnonymously, // Test ohne E-Mail
   onAuthStateChanged,
   signOut,
-  type User
+  type User,
+  signInWithPopup,
+  GoogleAuthProvider
 } from 'firebase/auth';
 
 export const useAuthStore = defineStore('authStore', () => {
@@ -18,18 +20,29 @@ export const useAuthStore = defineStore('authStore', () => {
     isLoading.value = false;
   });
 
-  // Test-Login (Anonym)
-  async function loginAnonymously() {
+  // Google Login Funktion
+  async function loginWithGoogle() {
+    const provider = new GoogleAuthProvider();
     try {
-      await signInAnonymously(auth);
-    } catch (error) {
-      console.error("Login fehlgeschlagen:", error);
+      const result = await signInWithPopup(auth, provider);
+      console.log("Erfolgreich angemeldet:", result.user.displayName);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error("Fehler beim Google Login:", error.message);
+      }
     }
   }
 
   async function logout() {
-    await signOut(auth);
+    const recipeStore = useRecipeStore();
+    try {
+      await signOut(auth);
+      user.value = null;
+      recipeStore.clearRecipes();
+    } catch (error: unknown) {
+      console.error("Logout Fehler:", error);
+    }
   }
 
-  return { user, isLoading, loginAnonymously, logout };
+  return { user, isLoading, logout, loginWithGoogle };
 });

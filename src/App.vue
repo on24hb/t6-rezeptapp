@@ -20,7 +20,10 @@ const authStore = useAuthStore()
             <button @click="authStore.logout" class="btn-secondary">Abmelden</button>
           </template>
           <template v-else>
-            <button @click="authStore.loginAnonymously" class="btn-login">Test-Login</button>
+            <button @click="authStore.loginWithGoogle" class="btn-google">
+              <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18" alt="Google" />
+              Mit Google anmelden
+            </button>
           </template>
         </div>
 
@@ -123,5 +126,23 @@ const authStore = useAuthStore()
   text-align: center;
   padding: 3rem;
   color: var(--secondary-color);
+}
+
+.btn-google {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: white;
+  color: #757575;
+  border: 1px solid #ddd;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-google:hover {
+  background-color: #f8f8f8;
 }
 </style>

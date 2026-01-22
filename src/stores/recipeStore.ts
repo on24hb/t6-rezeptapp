@@ -21,7 +21,7 @@ export const useRecipeStore = defineStore('recipeStore', () => {
 
   // Rezepte in Echtzeit laden
   const fetchRecipes = () => {
-    // 1. Falls bereits eine Verbindung besteht, diese beenden 
+    // 1. Falls bereits eine Verbindung besteht, diese beenden
     if (unsubscribe) {
       unsubscribe();
       unsubscribe = null;
@@ -41,7 +41,8 @@ export const useRecipeStore = defineStore('recipeStore', () => {
     where('userId', '==', auth.currentUser.uid),
     orderBy('createdAt', 'desc'));
 
-    return onSnapshot(q, (snapshot) => {
+    // Speichere die zurückgegebene Abmelde-Funktion, damit wir die Verbindung später beenden können
+    unsubscribe = onSnapshot(q, (snapshot) => {
       recipes.value = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
