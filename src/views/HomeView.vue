@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import RecipeList from '../components/RecipeList.vue'
 import { useRecipeStore } from '@/stores/recipeStore'
 import { AVAILABLE_TAGS } from '@/tags'
+import heartSolidFull from '@/assets/Icons/heart-solid-full.svg'
 
 const store = useRecipeStore()
 store.fetchRecipes()
@@ -49,7 +50,13 @@ const filteredRecipes = computed(() => {
         :class="{ active: filterFavorites }"
         :title="filterFavorites ? 'Zeige alle Rezepte' : 'Zeige nur Favoriten'"
       >
-        ❤️ Favoriten
+        <img 
+          :src="heartSolidFull" 
+          alt="Herz" 
+          class="heart-icon-filter"
+          :class="{ active: filterFavorites }"
+        />
+        Favoriten
       </button>
     </div>
   </header>
@@ -121,6 +128,16 @@ const filteredRecipes = computed(() => {
   cursor: pointer;
   font-weight: 500;
   transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.heart-icon-filter {
+  width: 18px;
+  height: 18px;
+  filter: invert(30%) sepia(10%) saturate(50%) hue-rotate(265deg) brightness(100%) contrast(97%);
+  transition: filter 0.2s ease;
 }
 
 .filter-btn:hover {
@@ -131,5 +148,9 @@ const filteredRecipes = computed(() => {
   background-color: #7c3aed;
   color: white;
   border-color: #7c3aed;
+}
+
+.filter-btn.active .heart-icon-filter {
+  filter: invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(97%);
 }
 </style>

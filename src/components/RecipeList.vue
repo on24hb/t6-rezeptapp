@@ -4,6 +4,8 @@ import { useRecipeStore } from '@/stores/recipeStore';
 import type { Recipe } from '@/types/Recipe';
 import RecipeTags from './RecipeTags.vue';
 import { useAuthStore } from '@/stores/authStore';
+import heartSolidFull from '@/assets/Icons/heart-solid-full.svg';
+import heartRegularFull from '@/assets/Icons/heart-regular-full.svg';
 
 const recipeStore = useRecipeStore();
 const authStore = useAuthStore();
@@ -79,7 +81,11 @@ const toggleFavorite = async (e: Event, recipe: Recipe) => {
             :class="{ 'is-favorite': recipe.isFavorite }"
             :aria-label="recipe.isFavorite ? 'Aus Favoriten entfernen' : 'Zu Favoriten hinzufügen'"
           >
-            ❤️
+            <img 
+              :src="recipe.isFavorite ? heartSolidFull : heartRegularFull" 
+              alt="Herz" 
+              class="heart-icon"
+            />
           </button>
         </div>
         <RecipeTags :tags="recipe.tags" />
@@ -193,21 +199,34 @@ h4 {
 .favorite-btn {
   background: none;
   border: none;
-  font-size: 1.5rem;
   cursor: pointer;
   padding: 0;
   opacity: 0.5;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.2s ease, filter 0.2s ease;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
 }
 
-.favorite-btn:hover {
-  opacity: 0.8;
+.heart-icon {
+  width: 100%;
+  height: 100%;
+  filter: invert(21%) sepia(51%) saturate(1344%) hue-rotate(265deg) brightness(101%) contrast(97%);
+}
+
+.favorite-btn:hover .heart-icon {
+  filter: invert(21%) sepia(51%) saturate(1344%) hue-rotate(265deg) brightness(110%) contrast(97%);
 }
 
 .favorite-btn.is-favorite {
   opacity: 1;
-  color: #7c3aed;
+}
+
+.favorite-btn.is-favorite .heart-icon {
+  filter: invert(21%) sepia(51%) saturate(1344%) hue-rotate(265deg) brightness(101%) contrast(97%);
 }
 
 .preview {
