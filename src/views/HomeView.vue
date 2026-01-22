@@ -3,12 +3,14 @@ import { ref, computed } from 'vue'
 import RecipeList from '../components/RecipeList.vue'
 import { useRecipeStore } from '@/stores/recipeStore'
 import { AVAILABLE_TAGS } from '@/tags'
+import heartSolidFull from '@/assets/Icons/heart-solid-full.svg'
 
 const store = useRecipeStore()
 store.fetchRecipes()
 
 const searchTerm = ref('')
 const filterTag = ref('')
+const filterFavorites = ref(false)
 
 const filteredRecipes = computed(() => {
   return store.recipes.filter(recipe => {
@@ -16,7 +18,9 @@ const filteredRecipes = computed(() => {
     
     const matchesTag = filterTag.value ? recipe.tags?.includes(filterTag.value) : true
     
-    return matchesSearch && matchesTag
+    const matchesFavorite = filterFavorites.value ? recipe.isFavorite : true
+    
+    return matchesSearch && matchesTag && matchesFavorite
   })
 })
 </script>
@@ -39,6 +43,21 @@ const filteredRecipes = computed(() => {
           {{ tag }}
         </option>
       </select>
+
+      <button 
+        @click="filterFavorites = !filterFavorites"
+        class="filter-btn"
+        :class="{ active: filterFavorites }"
+        :title="filterFavorites ? 'Zeige alle Rezepte' : 'Zeige nur Favoriten'"
+      >
+        <img 
+          :src="heartSolidFull" 
+          alt="Herz" 
+          class="heart-icon-filter"
+          :class="{ active: filterFavorites }"
+        />
+        Favoriten
+      </button>
     </div>
   </header>
 
@@ -79,13 +98,15 @@ const filteredRecipes = computed(() => {
   display: flex;
   gap: 1rem;
   justify-content: center;
-  max-width: 600px;
+  max-width: 900px;
   margin-left: auto;
   margin-right: auto;
+  flex-wrap: wrap;
 }
 
 .search-input {
   flex: 1;
+  min-width: 200px;
   padding: 0.8rem;
   border: 1px solid var(--border-color);
   border-radius: 8px;
@@ -96,5 +117,40 @@ const filteredRecipes = computed(() => {
   border: 1px solid var(--border-color);
   border-radius: 8px;
   background: white;
+  min-width: 150px;
+}
+
+.filter-btn {
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.heart-icon-filter {
+  width: 18px;
+  height: 18px;
+  filter: invert(30%) sepia(10%) saturate(50%) hue-rotate(265deg) brightness(100%) contrast(97%);
+  transition: filter 0.2s ease;
+}
+
+.filter-btn:hover {
+  border-color: var(--primary-color);
+}
+
+.filter-btn.active {
+  background-color: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+.filter-btn.active .heart-icon-filter {
+  filter: invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(97%);
 }
 </style>

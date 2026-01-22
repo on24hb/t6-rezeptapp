@@ -4,6 +4,8 @@ import { useRecipeStore } from '@/stores/recipeStore';
 import type { Recipe } from '@/types/Recipe';
 import RecipeTags from './RecipeTags.vue';
 import { useAuthStore } from '@/stores/authStore';
+import heartSolidFull from '@/assets/Icons/heart-solid-full.svg';
+import heartRegularFull from '@/assets/Icons/heart-regular-full.svg';
 
 const recipeStore = useRecipeStore();
 const authStore = useAuthStore();
@@ -33,6 +35,14 @@ onMounted(() => {
 });
 
 const displayedRecipes = computed(() => props.recipes ?? recipeStore.recipes);
+
+const toggleFavorite = async (e: Event, recipe: Recipe) => {
+  e.preventDefault();
+  e.stopPropagation();
+  if (recipe.id) {
+    await recipeStore.toggleFavorite(recipe.id);
+  }
+};
 </script>
 
 <template>
@@ -63,7 +73,21 @@ const displayedRecipes = computed(() => props.recipes ?? recipeStore.recipes);
         :to="`/recipe/${recipe.id}`"
         class="recipe-card"
       >
-        <h4>{{ recipe.title }}</h4>
+        <div class="recipe-header">
+          <h4>{{ recipe.title }}</h4>
+          <button
+            @click="toggleFavorite($event, recipe)"
+            class="favorite-btn"
+            :class="{ 'is-favorite': recipe.isFavorite }"
+            :aria-label="recipe.isFavorite ? 'Aus Favoriten entfernen' : 'Zu Favoriten hinzufügen'"
+          >
+            <img 
+              :src="recipe.isFavorite ? heartSolidFull : heartRegularFull" 
+              alt="Herz" 
+              class="heart-icon"
+            />
+          </button>
+        </div>
         <RecipeTags :tags="recipe.tags" />
 
         <p class="preview">{{ recipe.instructions }}</p>
@@ -158,9 +182,51 @@ const displayedRecipes = computed(() => props.recipes ?? recipeStore.recipes);
   box-shadow: var(--box-shadow-hover);
 }
 
+.recipe-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
 h4 {
-  margin: 0 0 0.75rem 0;
+  margin: 0;
   color: var(--text-color);
+  flex: 1;
+}
+
+.favorite-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  opacity: 0.5;
+  transition: opacity 0.2s ease, filter 0.2s ease;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}
+
+.heart-icon {
+  width: 100%;
+  height: 100%;
+  filter: invert(26%) sepia(54%) saturate(730%) hue-rotate(221deg) brightness(99%) contrast(91%);
+}
+
+.favorite-btn:hover .heart-icon {
+  filter: invert(26%) sepia(54%) saturate(730%) hue-rotate(221deg) brightness(108%) contrast(91%);
+}
+
+.favorite-btn.is-favorite {
+  opacity: 1;
+}
+
+.favorite-btn.is-favorite .heart-icon {
+  filter: invert(26%) sepia(54%) saturate(730%) hue-rotate(221deg) brightness(99%) contrast(91%);
 }
 
 .preview {
