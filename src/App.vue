@@ -36,11 +36,17 @@ const handleLogout = async () => {
         <span class="app-title">RezeptBuddy</span>
       </div>
 
+      <div class="navbar-right">
+        <RouterLink to="/add-recipe" class="btn-add mobile-add-btn" @click="closeMenu">
+          ＋ Neues Rezept
+        </RouterLink>
+
       <button class="menu-toggle" @click="toggleMenu" :class="{ 'active': isMenuOpen }">
         <span class="bar"></span>
         <span class="bar"></span>
         <span class="bar"></span>
       </button>
+      </div>
 
       <nav class="nav-links" :class="{ 'is-open': isMenuOpen }">
 
@@ -51,7 +57,7 @@ const handleLogout = async () => {
             <button @click="handleLogout" class="btn-secondary">Abmelden</button>
         </div>
 
-        <RouterLink to="/add-recipe" class="nav-item btn-add" @click="closeMenu">
+        <RouterLink to="/add-recipe" class="nav-item btn-add desktop-add-btn" @click="closeMenu">
           ＋ Neues Rezept
         </RouterLink>
       </nav>
@@ -64,6 +70,24 @@ const handleLogout = async () => {
 </template>
 
 <style scoped>
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.mobile-add-btn {
+  display: none;
+  text-decoration: none;
+  justify-content: center;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  background-color: var(--primary-color);
+  color: white !important;
+  border-radius: 6px;
+}
+
 .app-bar {
   display: flex;
   justify-content: space-between;
@@ -157,6 +181,25 @@ const handleLogout = async () => {
   }
   .nav-links.is-open { right: 0; }
   .auth-section { border-right: none; border-bottom: 1px solid var(--border-color); width: 100%; padding-bottom: 1rem; flex-direction: column; align-items: flex-start; }
+
+  .app-title {
+    display: none;
+  }
+
+  .desktop-add-btn {
+    display: none !important;
+  }
+  .mobile-add-btn {
+    display: flex;
+  }
+
+  .navbar-right {
+    gap: 0.75rem;
+  }
+
+  .app-title {
+    display: none;
+  }
 }
 
 .btn-login {
