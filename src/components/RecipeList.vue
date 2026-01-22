@@ -25,7 +25,7 @@ onMounted(() => {
         :key="recipe.id"
         :to="`/recipe/${recipe.id}`"
         class="recipe-card"
-    
+      >
         <h4>{{ recipe.title }}</h4>
         <RecipeTags :tags="recipe.tags" />
         
