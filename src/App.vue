@@ -52,7 +52,8 @@ const handleLogout = async () => {
 
       <div class="auth-section">
             <span class="user-status">
-              👤 {{ authStore.user?.isAnonymous ? 'Gast-Nutzer' : authStore.user?.email }}
+              <span class="user-icon">👤</span>
+              {{ authStore.user?.isAnonymous ? 'Gast-Nutzer' : authStore.user?.email }}
             </span>
             <button @click="handleLogout" class="btn-secondary">Abmelden</button>
         </div>
@@ -203,6 +204,49 @@ const handleLogout = async () => {
   .app-title {
     display: none;
   }
+
+  .auth-section {
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+    width: 100%;
+    padding: 1.5rem 0;
+    margin-bottom: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .user-status {
+    font-size: 0.9rem;
+    color: var(--text-dark);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    word-break: break-all;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .btn-secondary {
+    background-color: #fff1f1;
+    color: var(--danger-color);
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    border: 1px solid #fee2e2;
+    text-decoration: none;
+    font-size: 0.8rem;
+    width: auto;
+    text-align: center;
+    transition: background 0.2s;
+  }
+
+  .btn-secondary:active {
+    background-color: #fee2e2;
+  }
 }
 
 .btn-login {
@@ -216,12 +260,16 @@ const handleLogout = async () => {
 }
 
 .btn-secondary {
-  background: none;
-  border: none;
+  background-color: #fff1f1;
   color: var(--danger-color);
-  cursor: pointer;
-  font-size: 0.85rem;
-  text-decoration: underline;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid #fee2e2;
+  text-decoration: none;
+  font-size: 0.8rem;
+  width: auto;
+  text-align: center;
+  transition: background 0.2s;
 }
 
 .loading-overlay {

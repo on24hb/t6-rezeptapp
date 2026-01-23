@@ -14,6 +14,7 @@
   --text-light: #4b4b4b;
   --border-color: #eeeeee;
   --box-shadow: rgba(15, 15, 15, 0.05) 0px 1px 2px, rgba(15, 15, 15, 0.1) 0px 0px 1px;
+  --danger-color: #e74c3c;
 }
 
 body {
