@@ -3,6 +3,8 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useRecipeStore } from '@/stores/recipeStore'
 import { AVAILABLE_TAGS } from '@/tags'
+import { storage, auth } from '../../firebase'
+import { ref as sRef, uploadBytes, getDownloadURL } from 'firebase/storage'
 
 const emit = defineEmits(['saved'])
 const router = useRouter()
@@ -14,21 +16,39 @@ const ingredients = ref('')
 const instructions = ref('')
 const selectedTags = ref<string[]>([])
 const imageUrl = ref<string | null>(null)
+const isUploading = ref(false)
+
+async function uploadImageFile(file: File) {
+  if (!auth.currentUser) throw new Error('Nicht angemeldet')
+  const path = `recipes/${auth.currentUser.uid}/${Date.now()}_${file.name}`
+  const storageRef = sRef(storage, path)
+  await uploadBytes(storageRef, file)
+  return await getDownloadURL(storageRef)
+}
 
 const triggerFileInput = () => {
   fileInput.value?.click()
 }
 
-const handleImageUpload = (event: Event) => {
+const handleImageUpload = async (event: Event) => {
   const input = event.target as HTMLInputElement
   if (input.files && input.files[0]) {
     const file = input.files[0]
-    
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      imageUrl.value = e.target?.result as string
+    // Sofort eine lokale Vorschau anzeigen
+    imageUrl.value = URL.createObjectURL(file)
+
+    // Upload in Storage starten
+    try {
+      if (!navigator.onLine) throw new Error('offline')
+      isUploading.value = true
+      const downloadUrl = await uploadImageFile(file)
+      imageUrl.value = downloadUrl
+    } catch (err) {
+      console.error('Upload fehlgeschlagen:', err)
+      alert('Fehler beim Hochladen des Bildes')
+    } finally {
+      isUploading.value = false
     }
-    reader.readAsDataURL(file)
   }
 }
 
@@ -48,7 +68,7 @@ const submit = async () => {
     ingredients: ingredients.value,
     instructions: instructions.value,
     tags: selectedTags.value,
-    imageUrl: imageUrl.value || undefined, 
+    imageUrl: imageUrl.value || undefined,
     createdAt: new Date(),
   })
 
@@ -79,15 +99,15 @@ const handleCancel = () => {
         <div class="form-group">
           <label>Rezeptfoto</label>
           <div class="image-upload-container">
-            <input 
+            <input
               ref="fileInput"
-              type="file" 
-              accept="image/*" 
+              type="file"
+              accept="image/*"
               capture="environment"
-              @change="handleImageUpload" 
+              @change="handleImageUpload"
               class="file-input-hidden"
             />
-            
+
             <div v-if="imageUrl" class="preview-container">
               <img :src="imageUrl" alt="Vorschau" class="image-preview" />
               <button type="button" @click="removeImage" class="remove-btn">Foto entfernen</button>

@@ -2,6 +2,7 @@
 import { initializeApp } from 'firebase/app'
 import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from 'firebase/firestore'
 import { getAuth } from "firebase/auth";
+import { getStorage } from "firebase/storage";
 
 // Firebase configuration is loaded from environment variables (Vite requires VITE_ prefix)
 const firebaseConfig = {
@@ -35,4 +36,5 @@ const auth = getAuth(app);
 
 // Exportieren
 export { db, auth }
+export const storage = getStorage(app);
 

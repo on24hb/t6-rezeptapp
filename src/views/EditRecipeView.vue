@@ -10,12 +10,12 @@
 
       <div class="form-group">
         <label>Rezeptfoto</label>
-        <input 
+        <input
           ref="fileInput"
-          type="file" 
-          accept="image/*" 
+          type="file"
+          accept="image/*"
           capture="environment"
-          @change="handleImageUpload" 
+          @change="handleImageUpload"
           class="file-input-hidden"
         />
         <div v-if="formData && formData.imageUrl" class="preview-container">
@@ -55,6 +55,8 @@ import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useRecipeStore } from '@/stores/recipeStore'
 import type { Recipe } from '@/types/Recipe'
+import { storage, auth } from '../../firebase'
+import { ref as sRef, uploadBytes, getDownloadURL } from 'firebase/storage'
 
 const route = useRoute()
 const router = useRouter()
@@ -86,17 +88,27 @@ onMounted(async () => {
   }
 })
 
-const handleImageUpload = (event: Event) => {
+const handleImageUpload = async (event: Event) => {
   const input = event.target as HTMLInputElement
   if (input.files && input.files[0] && formData.value) {
     const file = input.files[0]
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      if (formData.value) {
-        formData.value.imageUrl = e.target?.result as string
-      }
+
+    // Sofort lokale Vorschau
+    formData.value.imageUrl = URL.createObjectURL(file)
+
+    // Upload zum Firebase Storage
+    try {
+      if (!auth.currentUser) throw new Error('Nicht angemeldet')
+      if (!navigator.onLine) throw new Error('offline')
+      const path = `recipes/${auth.currentUser.uid}/${Date.now()}_${file.name}`
+      const storageRef = sRef(storage, path)
+      await uploadBytes(storageRef, file)
+      const downloadUrl = await getDownloadURL(storageRef)
+      if (formData.value) formData.value.imageUrl = downloadUrl
+    } catch (err) {
+      console.error('Upload fehlgeschlagen:', err)
+      alert('Fehler beim Hochladen des Bildes')
     }
-    reader.readAsDataURL(file)
   }
 }
 
