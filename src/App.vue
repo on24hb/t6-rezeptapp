@@ -31,10 +31,10 @@ const handleLogout = async () => {
 <template>
   <div class="app-layout">
     <header class="app-bar" v-if="authStore.user && isNotLoginPage">
-      <div class="brand">
-        <img alt="Logo" class="logo" src="../logo.png" width="32" height="32" />
+        <RouterLink to="/" class="brand" @click="closeMenu">
+        <img src="/pwa-64x64.png" alt="Logo" class="logo" width="32" height="32" />
         <span class="app-title">RezeptBuddy</span>
-      </div>
+      </RouterLink>
 
       <div class="navbar-right">
         <RouterLink to="/add-recipe" class="btn-add mobile-add-btn" @click="closeMenu">
@@ -104,6 +104,9 @@ const handleLogout = async () => {
   display: flex;
   align-items: center;
   gap: 10px;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
 }
 
 .app-title {
