@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useOfflineStore } from '@/stores/offlineStore'
 import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
 import { computed, ref } from 'vue'
@@ -7,6 +8,7 @@ const authStore = useAuthStore()
 const route = useRoute()
 const router = useRouter()
 const isMenuOpen = ref(false)
+const offlineStore = useOfflineStore()
 
 const isNotLoginPage = computed(() => route.name !== 'login')
 
@@ -30,6 +32,11 @@ const handleLogout = async () => {
 
 <template>
   <div class="app-layout">
+    <!--Offline Banner-->
+    <div v-if="!offlineStore.isOnline" class="offline-banner">
+      Du bist offline. Im Offline-Modus können keine neuen Rezepte erstellt werden.
+    </div>
+
     <header class="app-bar" v-if="authStore.user && isNotLoginPage">
       <div class="brand">
         <img alt="Logo" class="logo" src="../logo.png" width="32" height="32" />
@@ -70,6 +77,29 @@ const handleLogout = async () => {
 </template>
 
 <style scoped>
+.offline-banner {
+  background-color: #c46111;
+  color: white;
+  padding: 12px;
+  text-align: center;
+  font-weight: 600;
+  animation: slideDown 0.3s ease-out;
+  position: sticky;
+  top: 0;
+  z-index: 99;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
 .navbar-right {
   display: flex;
   align-items: center;

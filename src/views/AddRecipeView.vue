@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import AddRecipe from '../components/AddRecipe.vue'
+import AddRecipe from '../components/AddREcipe.vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()

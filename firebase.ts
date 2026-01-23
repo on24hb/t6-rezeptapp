@@ -1,8 +1,6 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from 'firebase/app'
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-import { getFirestore } from 'firebase/firestore'
+import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from 'firebase/firestore'
 import { getAuth } from "firebase/auth";
 
 // Firebase configuration is loaded from environment variables (Vite requires VITE_ prefix)
@@ -25,11 +23,16 @@ if (!firebaseConfig.apiKey) {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig)
 
-// Firestore mit der App-Instanz verknüpfen
-const db = getFirestore(app)
+// Firestore mit Offline Persistence aktivieren (moderne Variante)
+const db = initializeFirestore(app, {
+  localCache: persistentLocalCache({
+    tabManager: persistentMultipleTabManager()
+  })
+})
 
 // Authentifizierung mit der App-Instanz verknüpfen
 const auth = getAuth(app);
 
 // Exportieren
 export { db, auth }
+
