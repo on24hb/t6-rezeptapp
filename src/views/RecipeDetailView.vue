@@ -9,9 +9,9 @@
           :class="{ 'is-favorite': recipe.isFavorite }"
           :title="recipe.isFavorite ? 'Aus Favoriten entfernen' : 'Zu Favoriten hinzufügen'"
         >
-          <img 
-            :src="recipe.isFavorite ? heartSolidFull : heartRegularFull" 
-            alt="Herz" 
+          <img
+            :src="recipe.isFavorite ? heartSolidFull : heartRegularFull"
+            alt="Herz"
             class="heart-icon-detail"
           />
         </button>
@@ -28,8 +28,10 @@
       </div>
 
       <div class="actions">
+        <div class="main-actions">
         <router-link :to="`/edit/${recipe.id}`" class="btn btn-edit">Bearbeiten</router-link>
         <button @click="confirmDelete" class="btn btn-delete">Löschen</button>
+        </div>
         <router-link to="/" class="btn btn-back">Zurück</router-link>
       </div>
     </div>
@@ -82,7 +84,7 @@ const confirmDelete = async () => {
 
 const toggleFavorite = async () => {
   if (!recipe.value?.id) return
-  
+
   try {
     await recipeStore.toggleFavorite(recipe.value.id)
     // Update local ref
@@ -179,10 +181,47 @@ h1 {
 
 .actions {
   display: flex;
+  flex-direction: column;
   gap: 1rem;
   margin-top: 2rem;
   padding-top: 1.5rem;
   border-top: 1px solid var(--border-color);
+}
+
+.main-actions {
+  display: flex;
+  gap: 1rem;
+  width: 100%;
+}
+
+.main-actions .btn {
+  flex: 1;
+  text-align: center;
+}
+
+@media (min-width: 600px) {
+  .actions {
+    flex-direction: row;
+    justify-content: flex-start;
+  }
+
+  .main-buttons {
+    width: auto;
+  }
+
+  .btn-back {
+    width: auto;
+    margin-left: auto;
+  }
+}
+
+@media (max-width: 400px) {
+  .detail-container {
+    padding: 1.5rem;
+  }
+  .btn-back {
+    text-align: center;
+  }
 }
 
 .btn {
@@ -195,6 +234,9 @@ h1 {
   font-weight: 500;
   transition: all 0.2s ease;
   font-size: 0.95rem;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .btn-edit {
