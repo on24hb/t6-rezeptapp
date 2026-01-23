@@ -37,6 +37,11 @@ const removeImage = () => {
 }
 
 const submit = async () => {
+  if (!navigator.onLine) {
+    alert('Du bist offline - Neue Rezepte können nicht gespeichert werden. Versuche es später erneut.')
+    return
+  }
+
   if (!title.value) return
   await store.addRecipe({
     title: title.value,

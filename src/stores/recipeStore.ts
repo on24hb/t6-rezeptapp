@@ -18,7 +18,7 @@ import {
   type DocumentData
 } from 'firebase/firestore';
 import type { Recipe } from '../types/Recipe';
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 
 // Helper type that matches stored Firestore shape
 type FirestoreRecipe = {
@@ -197,6 +197,25 @@ export const useRecipeStore = defineStore('recipeStore', () => {
     await updateRecipe(id, { isFavorite: !recipe.isFavorite });
   };
 
+  // Beim Online-Gehen synchronisieren
+  const syncOfflineChanges = async () => {
+    if (navigator.onLine) {
+      console.log('🔄 Syncing offline changes...')
+      try {
+        // Rezepte neu laden von Firebase
+        await fetchRecipes()
+        console.log('Sync erfolgreich')
+      } catch (error) {
+        console.error('Sync fehlgeschlagen:', error)
+      }
+    }
+  }
+
+  // Event Listener
+  if (typeof window !== 'undefined') {
+    window.addEventListener('online', syncOfflineChanges)
+  }
+
   return {
     recipes,
     loading,
@@ -206,6 +225,7 @@ export const useRecipeStore = defineStore('recipeStore', () => {
     updateRecipe,
     deleteRecipe,
     clearRecipes,
-    toggleFavorite
+    toggleFavorite,
+    syncOfflineChanges
   };
 });
