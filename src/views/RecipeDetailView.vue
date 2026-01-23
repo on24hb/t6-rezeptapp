@@ -1,20 +1,44 @@
 <template>
   <div class="recipe-detail">
     <div v-if="recipe" class="detail-container">
+      
+      <div v-if="recipe.imageUrl" class="image-section">
+        <img :src="recipe.imageUrl" :alt="recipe.title" class="recipe-image" />
+      </div>
+
       <div class="title-section">
         <h1>{{ recipe.title }}</h1>
-        <button
-          @click="toggleFavorite"
-          class="favorite-btn-detail"
-          :class="{ 'is-favorite': recipe.isFavorite }"
-          :title="recipe.isFavorite ? 'Aus Favoriten entfernen' : 'Zu Favoriten hinzufügen'"
-        >
-          <img 
-            :src="recipe.isFavorite ? heartSolidFull : heartRegularFull" 
-            alt="Herz" 
-            class="heart-icon-detail"
+        <div class="action-buttons">
+          <button
+            @click="triggerImageUpload"
+            class="camera-btn-detail"
+            title="Foto hinzufügen oder ändern"
+          >
+            <svg class="camera-icon-detail" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+              <path d="M213.1 128.8L202.7 160L128 160C92.7 160 64 188.7 64 224L64 480C64 515.3 92.7 544 128 544L512 544C547.3 544 576 515.3 576 480L576 224C576 188.7 547.3 160 512 160L437.3 160L426.9 128.8C420.4 109.2 402.1 96 381.4 96L258.6 96C237.9 96 219.6 109.2 213.1 128.8zM320 256C373 256 416 299 416 352C416 405 373 448 320 448C267 448 224 405 224 352C224 299 267 256 320 256z"/>
+            </svg>
+          </button>
+          <input 
+            ref="fileInput"
+            type="file" 
+            accept="image/*" 
+            capture="environment"
+            @change="handleImageUpload" 
+            class="file-input-hidden"
           />
-        </button>
+          <button
+            @click="toggleFavorite"
+            class="favorite-btn-detail"
+            :class="{ 'is-favorite': recipe.isFavorite }"
+            :title="recipe.isFavorite ? 'Aus Favoriten entfernen' : 'Zu Favoriten hinzufügen'"
+          >
+            <img 
+              :src="recipe.isFavorite ? heartSolidFull : heartRegularFull" 
+              alt="Herz" 
+              class="heart-icon-detail"
+            />
+          </button>
+        </div>
       </div>
 
       <div class="section">
@@ -40,6 +64,7 @@
 </template>
 
 <script setup lang="ts">
+// (Der Script Teil bleibt im Wesentlichen gleich, keine Änderungen an der Logik hier notwendig)
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useRecipeStore } from '@/stores/recipeStore'
@@ -51,12 +76,43 @@ const route = useRoute()
 const router = useRouter()
 const recipeStore = useRecipeStore()
 const recipe = ref<Recipe | null>(null)
+const fileInput = ref<HTMLInputElement | null>(null)
+
+const triggerImageUpload = () => {
+  fileInput.value?.click()
+}
+
+const handleImageUpload = (event: Event) => {
+  const input = event.target as HTMLInputElement
+  if (input.files && input.files[0] && recipe.value) {
+    const file = input.files[0]
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      if (recipe.value) {
+        recipe.value.imageUrl = e.target?.result as string
+        // Speichern des Bildes
+        updateRecipeImage()
+      }
+    }
+    reader.readAsDataURL(file)
+  }
+}
+
+const updateRecipeImage = async () => {
+  if (!recipe.value?.id) return
+  
+  try {
+    await recipeStore.updateRecipe(recipe.value.id, { imageUrl: recipe.value.imageUrl })
+  } catch (err) {
+    console.error('Error updating image:', err)
+    alert('Fehler beim Speichern des Bildes')
+  }
+}
 
 onMounted(async () => {
   const recipeId = route.params.id as string
   let found = recipeStore.recipes.find(r => r.id === recipeId)
   if (!found) {
-    // fallback: try a one-time fetch in case store wasn't populated
     await recipeStore.fetchRecipesOnce()
     found = recipeStore.recipes.find(r => r.id === recipeId)
   }
@@ -85,7 +141,6 @@ const toggleFavorite = async () => {
   
   try {
     await recipeStore.toggleFavorite(recipe.value.id)
-    // Update local ref
     if (recipe.value) {
       recipe.value.isFavorite = !recipe.value.isFavorite
     }
@@ -110,6 +165,22 @@ const toggleFavorite = async () => {
   box-shadow: var(--box-shadow);
 }
 
+.image-section {
+  margin-bottom: 2rem;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.recipe-image {
+  max-width: 100%;
+  max-height: 400px;
+  border-radius: 12px;
+  object-fit: contain;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
 .title-section {
   display: flex;
   justify-content: space-between;
@@ -125,6 +196,40 @@ h1 {
   flex: 1;
   color: var(--primary-color);
   font-size: 2rem;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.file-input-hidden {
+  display: none;
+}
+
+.camera-btn-detail {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  opacity: 0.5;
+  transition: opacity 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+}
+
+.camera-btn-detail:hover {
+  opacity: 0.7;
+}
+
+.camera-icon-detail {
+  width: 100%;
+  height: 100%;
+  filter: invert(26%) sepia(54%) saturate(730%) hue-rotate(221deg) brightness(99%) contrast(91%);
 }
 
 .favorite-btn-detail {

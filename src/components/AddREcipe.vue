@@ -8,10 +8,33 @@ const emit = defineEmits(['saved'])
 const router = useRouter()
 
 const store = useRecipeStore()
+const fileInput = ref<HTMLInputElement | null>(null)
 const title = ref('')
 const ingredients = ref('')
 const instructions = ref('')
 const selectedTags = ref<string[]>([])
+const imageUrl = ref<string | null>(null)
+
+const triggerFileInput = () => {
+  fileInput.value?.click()
+}
+
+const handleImageUpload = (event: Event) => {
+  const input = event.target as HTMLInputElement
+  if (input.files && input.files[0]) {
+    const file = input.files[0]
+    
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      imageUrl.value = e.target?.result as string
+    }
+    reader.readAsDataURL(file)
+  }
+}
+
+const removeImage = () => {
+  imageUrl.value = null
+}
 
 const submit = async () => {
   if (!title.value) return
@@ -20,6 +43,7 @@ const submit = async () => {
     ingredients: ingredients.value,
     instructions: instructions.value,
     tags: selectedTags.value,
+    imageUrl: imageUrl.value || undefined, 
     createdAt: new Date(),
   })
 
@@ -30,6 +54,7 @@ const submit = async () => {
   ingredients.value = ''
   instructions.value = ''
   selectedTags.value = []
+  imageUrl.value = null
 }
 
 const handleCancel = () => {
@@ -44,6 +69,33 @@ const handleCancel = () => {
         <div class="form-group">
           <label>Titel</label>
           <input v-model="title" type="text" placeholder="z.B. Omas Apfelkuchen" required />
+        </div>
+
+        <div class="form-group">
+          <label>Rezeptfoto</label>
+          <div class="image-upload-container">
+            <input 
+              ref="fileInput"
+              type="file" 
+              accept="image/*" 
+              capture="environment"
+              @change="handleImageUpload" 
+              class="file-input-hidden"
+            />
+            
+            <div v-if="imageUrl" class="preview-container">
+              <img :src="imageUrl" alt="Vorschau" class="image-preview" />
+              <button type="button" @click="removeImage" class="remove-btn">Foto entfernen</button>
+            </div>
+            <div v-else class="camera-upload-prompt">
+              <button type="button" @click="triggerFileInput" class="camera-icon-btn" title="Foto hinzufügen">
+                <svg class="camera-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+                  <path d="M213.1 128.8L202.7 160L128 160C92.7 160 64 188.7 64 224L64 480C64 515.3 92.7 544 128 544L512 544C547.3 544 576 515.3 576 480L576 224C576 188.7 547.3 160 512 160L437.3 160L426.9 128.8C420.4 109.2 402.1 96 381.4 96L258.6 96C237.9 96 219.6 109.2 213.1 128.8zM320 256C373 256 416 299 416 352C416 405 373 448 320 448C267 448 224 405 224 352C224 299 267 256 320 256z"/>
+                </svg>
+              </button>
+              <p class="upload-text">Klicke auf das Kamera-Icon um ein Foto hinzuzufügen</p>
+            </div>
+          </div>
         </div>
 
         <div class="form-group">
@@ -105,7 +157,7 @@ label {
   color: #666;
 }
 
-input,
+input[type="text"],
 textarea {
   width: 100%;
   padding: 1rem;
@@ -114,6 +166,87 @@ textarea {
   font-size: 1rem;
   font-family: inherit;
   background-color: #fafafa;
+}
+
+.file-input-hidden {
+  display: none;
+}
+
+.image-upload-container {
+  position: relative;
+}
+
+.camera-upload-prompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem 1rem;
+  border: 2px dashed #8873e6;
+  border-radius: 8px;
+  background-color: #f9f7ff;
+}
+
+.camera-icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.camera-icon-btn:hover {
+  transform: scale(1.1);
+  opacity: 0.8;
+}
+
+.camera-icon {
+  width: 3rem;
+  height: 3rem;
+  color: #8873e6;
+}
+
+.upload-text {
+  color: #666;
+  font-size: 0.9rem;
+  text-align: center;
+  margin: 0;
+}
+
+.preview-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.image-preview {
+  max-width: 100%;
+  height: auto;
+  max-height: 300px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  object-fit: contain;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.remove-btn {
+  margin-top: 0.75rem;
+  background-color: #ff5252;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.2s ease;
+}
+
+.remove-btn:hover {
+  background-color: #ff3838;
 }
 
 input:focus,
