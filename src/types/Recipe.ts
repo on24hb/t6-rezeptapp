@@ -7,4 +7,5 @@ export interface Recipe {
   tags?: string[];
   userId?: string;
   isFavorite?: boolean;
+  imageUrl?: string;
 }
