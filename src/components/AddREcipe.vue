@@ -53,7 +53,7 @@ const submit = async () => {
   })
 
   emit('saved')
-  
+
   // Felder leeren
   title.value = ''
   ingredients.value = ''
@@ -306,7 +306,8 @@ form {
 .tags-selection {
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: 0.5rem;
+  width: 100%;
 }
 
 .checkbox-label {
@@ -314,6 +315,36 @@ form {
   align-items: center;
   gap: 0.25rem;
   font-weight: normal;
+  padding: 0.6rem 1rem;
+  background-color: #f0f0f0;
+  border: 1.5px solid #ddd;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #555;
   cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  justify-content: center;
+  flex: 1 0 auto;
+  min-width: 80px;
+}
+
+.checkbox-label input[type="checkbox"] {
+  display: none;
+}
+
+.checkbox-label:has(input:checked) {
+  background-color: #8873e6;
+  border-color: #8873e6;
+  color: white;
+  box-shadow: 0 2px 4px rgba(136, 115, 230, 0.3);
+}
+
+@media (hover: hover) {
+  .checkbox-label:hover {
+    border-color: #8873e6;
+    background-color: #f8f7ff;
+  }
 }
 </style>

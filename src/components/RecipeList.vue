@@ -81,9 +81,9 @@ const toggleFavorite = async (e: Event, recipe: Recipe) => {
             :class="{ 'is-favorite': recipe.isFavorite }"
             :aria-label="recipe.isFavorite ? 'Aus Favoriten entfernen' : 'Zu Favoriten hinzufügen'"
           >
-            <img 
-              :src="recipe.isFavorite ? heartSolidFull : heartRegularFull" 
-              alt="Herz" 
+            <img
+              :src="recipe.isFavorite ? heartSolidFull : heartRegularFull"
+              alt="Herz"
               class="heart-icon"
             />
           </button>
@@ -249,5 +249,6 @@ h4 {
   padding: 0;
   font-weight: 600;
   text-align: left;
+  cursor: pointer;
 }
 </style>
