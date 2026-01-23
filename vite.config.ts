@@ -19,16 +19,16 @@ export default defineConfig({
         theme_color: '#ffffff',
         icons: [
         {
-          src: 'manifest-icon-192.png',
+          src: 'manifest-icon-192.maskable.png',
           sizes: '192x192',
           type: 'image/png',
-          purpose: 'any'
+          purpose: 'any maskable'
         },
         {
-          src: 'manifest-icon-512.png',
+          src: 'manifest-icon-512.maskable.png',
           sizes: '512x512',
           type: 'image/png',
-          purpose: 'any'
+          purpose: 'any maskable'
         },
         {
           src: 'apple-icon-180.png',
@@ -37,6 +37,9 @@ export default defineConfig({
         }
         ],
       },
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,vue}']
+      }
     }),
     vueDevTools(),
   ],
