@@ -114,10 +114,24 @@ const handleImageUpload = async (event: Event) => {
 }
 
 const removeImage = () => {
-  if (formData.value) {
-    // Mark imageUrl explicitly as null so the store will remove the field from Firestore
-    formData.value = ({ ...formData.value, imageUrl: null } as FormRecipe)
+  if (!formData.value) return
+
+  if (!confirm('Möchtest du das Bild wirklich entfernen?')) {
+    return
   }
+
+  // Lokale Blob-URL widerrufen, falls vorhanden
+  try {
+    const url = formData.value.imageUrl
+    if (url && url.startsWith('blob:')) {
+      URL.revokeObjectURL(url)
+    }
+  } catch {
+    // Ignorieren
+  }
+
+  // Setze imageUrl auf null, um das Bild zu entfernen
+  formData.value = ({ ...formData.value, imageUrl: null } as FormRecipe)
 }
 
 const saveRecipe = async () => {
