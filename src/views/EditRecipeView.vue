@@ -62,8 +62,9 @@ const route = useRoute()
 const router = useRouter()
 const recipeStore = useRecipeStore()
 
+type FormRecipe = Partial<Recipe> & { imageUrl?: string | null }
 const recipe = ref<Recipe | null>(null)
-const formData = ref<Partial<Recipe> | null>(null)
+const formData = ref<FormRecipe | null>(null)
 const fileInput = ref<HTMLInputElement | null>(null)
 
 const cancelUrl = computed(() => `/`)
@@ -114,7 +115,8 @@ const handleImageUpload = async (event: Event) => {
 
 const removeImage = () => {
   if (formData.value) {
-    formData.value.imageUrl = undefined
+    // Mark imageUrl explicitly as null so the store will remove the field from Firestore
+    formData.value = ({ ...formData.value, imageUrl: null } as FormRecipe)
   }
 }
 
@@ -122,7 +124,10 @@ const saveRecipe = async () => {
   if (!recipe.value || !formData.value || !recipe.value.id) return
 
   try {
-    await recipeStore.updateRecipe(recipe.value.id, formData.value as Partial<Recipe>)
+    // Keep imageUrl value as-is (can be string, undefined or null).
+    // The store will treat `null` as a request to delete the field in Firestore.
+    const updateData = { ...formData.value } as unknown as Partial<Recipe>
+    await recipeStore.updateRecipe(recipe.value.id, updateData)
     router.push(`/recipe/${recipe.value.id}`)
   } catch (err) {
     console.error('Save error', err)

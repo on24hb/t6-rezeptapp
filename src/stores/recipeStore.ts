@@ -15,10 +15,11 @@ import {
   serverTimestamp,
   Timestamp,
   type UpdateData,
-  type DocumentData
+  type DocumentData,
+  deleteField
 } from 'firebase/firestore';
 import type { Recipe } from '../types/Recipe';
-import { ref, onMounted } from 'vue';
+import { ref } from 'vue';
 
 // Helper type that matches stored Firestore shape
 type FirestoreRecipe = {
@@ -140,7 +141,7 @@ export const useRecipeStore = defineStore('recipeStore', () => {
     try {
       const recipeRef = doc(db, 'recipes', id);
       const payload: Record<string, unknown> = {};
-      
+
       if (updates.title !== undefined) payload.title = updates.title;
       if (updates.ingredients !== undefined) payload.ingredients = updates.ingredients;
       if (updates.instructions !== undefined) payload.instructions = updates.instructions;
@@ -148,7 +149,12 @@ export const useRecipeStore = defineStore('recipeStore', () => {
       if (updates.tags !== undefined) payload.tags = updates.tags;
       if (updates.userId !== undefined) payload.userId = updates.userId;
       if (updates.isFavorite !== undefined) payload.isFavorite = updates.isFavorite;
-      if (updates.imageUrl !== undefined) payload.imageUrl = updates.imageUrl; // Neu
+      // Handle imageUrl: if explicitly null -> delete field from Firestore
+      if (updates.imageUrl === null) {
+        payload.imageUrl = deleteField();
+      } else if (updates.imageUrl !== undefined) {
+        payload.imageUrl = updates.imageUrl; // Neu
+      }
 
       await updateDoc(recipeRef, payload as UpdateData<DocumentData>);
 
@@ -156,7 +162,7 @@ export const useRecipeStore = defineStore('recipeStore', () => {
       if (index !== -1) {
         const existing = recipes.value[index];
         const updated = { ...existing } as Recipe;
-      
+
         if (updates.title !== undefined) updated.title = updates.title;
         if (updates.ingredients !== undefined) updated.ingredients = updates.ingredients!;
         if (updates.instructions !== undefined) updated.instructions = updates.instructions!;

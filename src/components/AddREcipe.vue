@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router'
 import { useRecipeStore } from '@/stores/recipeStore'
 import { AVAILABLE_TAGS } from '@/tags'
 import { storage, auth } from '../../firebase'
-import { ref as sRef, uploadBytes, getDownloadURL } from 'firebase/storage'
+import { ref as sRef, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage'
 
 const emit = defineEmits(['saved'])
 const router = useRouter()
@@ -52,7 +52,21 @@ const handleImageUpload = async (event: Event) => {
   }
 }
 
-const removeImage = () => {
+const removeImage = async () => {
+if (!imageUrl.value) return
+
+  const urlToDelete = imageUrl.value
+
+  if (urlToDelete.startsWith('http')) {
+    try {
+      const storageRef = sRef(storage, urlToDelete)
+      await deleteObject(storageRef)
+      console.log('Bild erfolgreich aus Storage gelöscht')
+    } catch (err) {
+      console.error('Löschen im Storage fehlgeschlagen (evtl. schon weg):', err)
+    }
+  }
+
   imageUrl.value = null
 }
 
