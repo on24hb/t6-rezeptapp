@@ -56,7 +56,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useRecipeStore } from '@/stores/recipeStore'
 import type { Recipe } from '@/types/Recipe'
 import { storage, auth } from '../../firebase'
-import { ref as sRef, uploadBytes, getDownloadURL } from 'firebase/storage'
+import { ref as sRef, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage'
 
 const route = useRoute()
 const router = useRouter()
@@ -124,8 +124,35 @@ const saveRecipe = async () => {
   if (!recipe.value || !formData.value || !recipe.value.id) return
 
   try {
-    // Keep imageUrl value as-is (can be string, undefined or null).
-    // The store will treat `null` as a request to delete the field in Firestore.
+    // Wenn der Nutzer das Bild entfernt hat, Datei auch aus dem Firebase Storage löschen
+    if (formData.value.imageUrl === null && recipe.value.imageUrl && recipe.value.imageUrl.startsWith('http')) {
+      try {
+        const downloadUrl = recipe.value.imageUrl as string
+        // Extrahiere den Pfad aus der Download-URL. Download-URLs enthalten '/o/<encoded-path>?'
+        const match = downloadUrl.match(/\/o\/([^?]+)/)
+        if (match && match[1]) {
+          const storagePath = decodeURIComponent(match[1])
+          const oldRef = sRef(storage, storagePath)
+          await deleteObject(oldRef)
+          console.log('Altes Bild im Storage gelöscht (Pfad)')
+        } else {
+          // Fallback: Versuche, die URL direkt zu verwenden
+          try {
+            const oldRef = sRef(storage, downloadUrl)
+            await deleteObject(oldRef)
+            console.log('Altes Bild im Storage gelöscht (URL-Fallback)')
+          } catch (innerErr) {
+            console.warn('Konnte altes Bild im Storage nicht löschen (Fallback):', innerErr)
+          }
+        }
+      } catch (err) {
+        console.warn('Konnte altes Bild im Storage nicht löschen:', err)
+        // Nicht kritisch, daher nur Warnung
+      }
+    }
+
+    // Behalte den Wert von imageUrl bei (kann string, undefined oder null sein).
+    // Der Store behandelt `null` als Anfrage, das Feld in Firestore zu löschen.
     const updateData = { ...formData.value } as unknown as Partial<Recipe>
     await recipeStore.updateRecipe(recipe.value.id, updateData)
     router.push(`/recipe/${recipe.value.id}`)

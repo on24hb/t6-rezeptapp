@@ -128,7 +128,7 @@ export const useRecipeStore = defineStore('recipeStore', () => {
         tags: recipe.tags || [],
         userId: auth.currentUser.uid,
         isFavorite: false,
-        imageUrl: recipe.imageUrl || null, // Neu
+        imageUrl: recipe.imageUrl || null,
         createdAt: serverTimestamp()
       });
     } catch (error) {
@@ -153,7 +153,7 @@ export const useRecipeStore = defineStore('recipeStore', () => {
       if (updates.imageUrl === null) {
         payload.imageUrl = deleteField();
       } else if (updates.imageUrl !== undefined) {
-        payload.imageUrl = updates.imageUrl; // Neu
+        payload.imageUrl = updates.imageUrl;
       }
 
       await updateDoc(recipeRef, payload as UpdateData<DocumentData>);
@@ -170,7 +170,7 @@ export const useRecipeStore = defineStore('recipeStore', () => {
         if (updates.tags !== undefined) updated.tags = updates.tags;
         if (updates.userId !== undefined) updated.userId = updates.userId;
         if (updates.isFavorite !== undefined) updated.isFavorite = updates.isFavorite;
-        if (updates.imageUrl !== undefined) updated.imageUrl = updates.imageUrl; // Neu
+        if (updates.imageUrl !== undefined) updated.imageUrl = updates.imageUrl;
         recipes.value[index] = updated;
       }
     } catch (error) {
