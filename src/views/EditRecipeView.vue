@@ -45,8 +45,15 @@
         <textarea v-model="formData.ingredients" id="ingredients" required></textarea>
       </div>
       <div class="form-group">
-        <label for="instructions">Anleitung</label>
-        <textarea v-model="formData.instructions" id="instructions" required></textarea>
+        
+      <div class="label-with-info">
+          <label for="instructions">Anleitung</label>
+          <div class="info-tooltip">
+            <span class="info-icon">i</span>
+            <span class="tooltip-text">Formuliere deine Anleitung in einzelnen Schritten, damit sie in der geführten Ansicht automatisch übernommen wird</span>
+          </div>
+        </div>
+         <textarea v-model="formData.instructions" id="instructions" required></textarea>
       </div>
 
       <div class="form-group">
@@ -296,6 +303,70 @@ textarea:focus {
 textarea {
   min-height: 120px;
   resize: vertical;
+}
+
+.label-with-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 5px;
+}
+.label-with-info label {
+  margin-bottom: 0;
+}
+.info-tooltip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: help;
+}
+.info-icon {
+  width: 18px;
+  height: 18px;
+  background: #999;
+  color: white;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-style: italic;
+}
+.tooltip-text {
+  visibility: hidden;
+  width: 200px;
+  background-color: #333;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 8px;
+  position: absolute;
+  z-index: 100;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -100px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  font-size: 0.8rem;
+  font-weight: normal;
+  line-height: 1.4;
+  pointer-events: none;
+}
+.tooltip-text::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #333 transparent transparent transparent;
+}
+.info-tooltip:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
 }
 
 .file-input-hidden {
