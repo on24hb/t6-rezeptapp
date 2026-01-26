@@ -2,6 +2,21 @@
   <Transition name="fade">
     <div v-if="isOpen" class="cooking-overlay">
       <div class="overlay-header">
+        <button
+          @click="showIngredients = !showIngredients"
+          class="btn-toggle-ingredients"
+          :class="{ 'is-active': showIngredients }"
+        >
+          <span class="btn-text">Zutaten</span>
+          <svg
+            class="icon-chevron"
+            :class="{ 'is-rotated': showIngredients }"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 448 512"
+          >
+            <path d="M201.4 342.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 274.7 86.6 137.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"/>
+          </svg>
+        </button>
         <div class="progress-bar">
           <div
             class="progress-fill"
@@ -15,6 +30,17 @@
         <span class="step-number">Schritt {{ currentIndex + 1 }} von {{ steps.length }}</span>
         <h2 class="step-text">{{ steps[currentIndex] }}</h2>
       </div>
+
+      <Transition name="slide">
+        <div v-if="showIngredients" class="ingredients-drawer">
+          <div class="drawer-header">
+            <h2>Zutatenliste</h2>
+          </div>
+          <div class="drawer-content">
+            <p class="ingredients-raw">{{ ingredients }}</p>
+          </div>
+        </div>
+      </Transition>
 
       <div class="overlay-footer">
         <button
@@ -38,11 +64,13 @@ import { ref, computed, watch } from 'vue'
 const props = defineProps<{
   isOpen: boolean;
   steps: string[];
+  ingredients: string;
 }>()
 
 const emit = defineEmits(['close'])
 
 const currentIndex = ref(0)
+const showIngredients = ref(false)
 
 // Reset des Index, wenn der Modus neu geöffnet wird
 watch(() => props.isOpen, (newVal) => {
@@ -84,7 +112,6 @@ const prev = () => {
   padding: env(safe-area-inset-top) 1.5rem env(safe-area-inset-bottom);
 }
 
-/* Fortschrittsbalken oben */
 .overlay-header {
   height: 60px;
   display: flex;
@@ -183,5 +210,96 @@ const prev = () => {
 .fade-enter-from, .fade-leave-to {
   opacity: 0;
   transform: translateY(20px);
+}
+
+.btn-toggle-ingredients {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fff;
+  border: 1px solid var(--primary-color);
+  padding: 8px 14px;
+  border-radius: 25px;
+  font-weight: 700;
+  color: var(--primary-color);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.btn-toggle-ingredients:hover {
+  background: var(--primary-color);
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.btn-toggle-ingredients.is-active {
+  background: var(--primary-color);
+  color: white;
+}
+
+.btn-text {
+  font-size: 0.9rem;
+}
+
+.icon-chevron {
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
+  transition: transform 0.3s ease;
+}
+
+.icon-chevron.is-rotated {
+  transform: rotate(180deg);
+}
+
+.ingredients-drawer {
+  position: absolute;
+  top: 80px;
+  left: 1.5rem;
+  right: 1.5rem;
+  bottom: 100px;
+  background: white;
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+  z-index: 3010;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.drawer-header {
+  padding: 1rem 1.5rem;
+  background: #fcfcfc;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #eee;
+}
+
+.drawer-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: #444;
+}
+.drawer-header button {
+  background: none;
+  border: none;
+  color: var(--primary-color);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.drawer-content {
+  padding: 1.5rem;
+  overflow-y: auto;
+}
+.ingredients-raw {
+  white-space: pre-wrap;
+  line-height: 1.7;
+  color: #555;
+  font-size: 1.3rem;
 }
 </style>
