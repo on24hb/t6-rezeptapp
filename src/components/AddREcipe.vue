@@ -224,7 +224,9 @@ const handleCancel = () => {
           <textarea
             v-model="instructions"
             rows="8"
-            placeholder="Schritt für Schritt Anleitung..."
+            placeholder="Schritt 1: Zutaten schneiden
+            Schritt 2: Zutaten in den Topf geben
+            Schritt 3: Rühren"
           ></textarea>
         </div>
 
@@ -292,6 +294,9 @@ textarea {
   font-size: 1rem;
   font-family: inherit;
   background-color: #fafafa;
+}
+textarea::placeholder {
+  white-space: pre-line;
 }
 
 .file-input-hidden {
