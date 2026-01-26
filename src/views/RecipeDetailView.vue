@@ -76,27 +76,33 @@
           <p v-else>Lass dich entspannt durch die Zubereitung führen.</p>
         </div>
       </div>
-      <button class="btn-start-mode" @click="startCookingMode">
+      <button class="btn-start-mode" @click="isCookingModeActive = true">
         Modus starten
       </button>
     </div>
   </div>
+  <CookingModeOverlay
+      :is-open="isCookingModeActive"
+      :steps="steps"
+      @close="isCookingModeActive = false"
+    />
 </template>
 
 <script setup lang="ts">
-// (Der Script Teil bleibt im Wesentlichen gleich, keine Änderungen an der Logik hier notwendig)
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useRecipeStore } from '@/stores/recipeStore'
 import type { Recipe } from '@/types/Recipe'
 import heartSolidFull from '@/assets/Icons/heart-solid-full.svg'
 import heartRegularFull from '@/assets/Icons/heart-regular-full.svg'
+import CookingModeOverlay from '@/components/CookingModeOverlay.vue'
 
 const route = useRoute()
 const router = useRouter()
 const recipeStore = useRecipeStore()
 const recipe = ref<Recipe | null>(null)
 const fileInput = ref<HTMLInputElement | null>(null)
+const isCookingModeActive = ref(false)
 
 const triggerImageUpload = () => {
   fileInput.value?.click()
@@ -177,11 +183,6 @@ const steps = computed(() => {
     .map(s => s.trim())
     .filter(s => s.length > 0)
 })
-
-const startCookingMode = () => {
-  console.log('Kochmodus gestartet')
-  // tbd. Overlay öffnen
-}
 </script>
 
 <style scoped>
