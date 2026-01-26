@@ -24,7 +24,12 @@
 
         <div v-if="formData && formData.imageUrl && !isUploading" class="preview-container">
           <img :src="formData.imageUrl" alt="Vorschau" class="image-preview" />
-          <button type="button" @click="removeImage" class="remove-btn">Foto entfernen</button>
+          <button type="button" @click="removeImage" class="remove-btn" title="Foto entfernen">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="x-icon">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
         </div>
         <div v-else-if="!isUploading" class="camera-upload-prompt">
           <button type="button" @click="triggerFileInput" class="camera-icon-btn" title="Foto hinzufügen">
@@ -217,6 +222,11 @@ const saveRecipe = async () => {
   margin: 15px 0;
   display: flex;
   flex-direction: column;
+  min-width: 0;
+}
+h1 {
+  overflow-wrap: break-word; 
+  word-break: break-word;
 }
 
 label {
@@ -240,9 +250,6 @@ textarea {
   display: none;
 }
 
-.image-upload-container {
-  position: relative;
-}
 
 .camera-upload-prompt {
   display: flex;
@@ -288,47 +295,48 @@ textarea {
 .preview-container {
   margin-top: 1rem;
   position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.image-preview {
-  max-width: 100%;
-  height: auto;
-  max-height: 300px;
-  border-radius: 4px;
-  border: 1px solid #ddd;
-  object-fit: contain;
-}
-
-.remove-btn {
   display: block;
-  margin-top: 5px;
-  background: #ff5252;
-  color: white;
-  border: none;
-  padding: 5px 10px;
-  border-radius: 4px;
-  cursor: pointer;
+
 }.image-preview {
-  max-width: 100%;
-  height: auto;
-  max-height: 300px;
+  width: 100%;
+  height: 300px;
   border-radius: 4px;
   border: 1px solid #ddd;
-  object-fit: contain;
+  object-fit: cover;
+  display: block;
+  
 }
 
+
+
 .remove-btn {
-  display: block;
-  margin-top: 5px;
-  background: #ff5252;
+  position: absolute;
+  top: -10px;    
+  right: -10px;  
+  background: #da6834;
   color: white;
-  border: none;
-  padding: 5px 10px;
-  border-radius: 4px;
+  border: 2px solid white; 
+  width: 32px;
+  height: 32px;
+  border-radius: 50%; 
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  padding: 0;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+  z-index: 10;
+}
+
+.remove-btn:hover {
+  transform: scale(1.1);
+  background: #f37f49;
+}
+
+.x-icon {
+  width: 18px;
+  height: 18px;
 }
 
 .actions {
@@ -344,6 +352,8 @@ textarea {
   cursor: pointer;
   text-decoration: none;
   display: inline-block;
+  font-weight: 500;
+  transition: all 0.2s ease;
 }
 
 .btn-save {

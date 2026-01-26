@@ -120,7 +120,7 @@ const handleImageUpload = async (event: Event) => {
     const file = input.files[0]
     
     if (!auth.currentUser) {
-      alert('Bitte melde dich an.')
+      alert('Bitte melde dich an, um ein Bild hochzuladen.')
       return
     }
 
@@ -137,6 +137,7 @@ const handleImageUpload = async (event: Event) => {
       const downloadUrl = await getDownloadURL(storageRef)
 
       recipe.value.imageUrl = downloadUrl
+
       await updateRecipeImage()
 
     } catch (err) {
@@ -242,6 +243,9 @@ h1 {
   flex: 1;
   color: var(--primary-color);
   font-size: 2rem;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  min-width: 0;
 }
 
 .action-buttons {
