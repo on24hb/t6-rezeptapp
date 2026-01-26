@@ -62,12 +62,30 @@
     <div v-else>
       <p>Rezept nicht gefunden</p>
     </div>
+    <div class="cooking-mode-card">
+      <div class="card-content">
+        <div class="icon-wrapper">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="mode-icon">
+            <path d="M8 5.14v14.72a1 1 0 0 0 1.5.86l11-7.36a1 1 0 0 0 0-1.72l-11-7.36a1 1 0 0 0-1.5.86z" />
+          </svg>
+        </div>
+        <div class="info-text">
+          <span class="badge">Interaktiv</span>
+          <h3>Schritt-für-Schritt Kochmodus</h3>
+          <p v-if="steps.length > 0">Starte die geführte Anleitung für alle {{ steps.length }} Schritte.</p>
+          <p v-else>Lass dich entspannt durch die Zubereitung führen.</p>
+        </div>
+      </div>
+      <button class="btn-start-mode" @click="startCookingMode">
+        Modus starten
+      </button>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 // (Der Script Teil bleibt im Wesentlichen gleich, keine Änderungen an der Logik hier notwendig)
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useRecipeStore } from '@/stores/recipeStore'
 import type { Recipe } from '@/types/Recipe'
@@ -149,6 +167,20 @@ const toggleFavorite = async () => {
   } catch (err) {
     console.error('Error toggling favorite:', err)
   }
+}
+
+// Berechnet die Koch-Schritte basierend auf Zeilenumbrüchen
+const steps = computed(() => {
+  if (!recipe.value?.instructions) return []
+  return recipe.value.instructions
+    .split('\n')
+    .map(s => s.trim())
+    .filter(s => s.length > 0)
+})
+
+const startCookingMode = () => {
+  console.log('Kochmodus gestartet')
+  // tbd. Overlay öffnen
 }
 </script>
 
@@ -375,5 +407,102 @@ h1 {
   opacity: 0.9;
   transform: translateY(-2px);
   box-shadow: var(--box-shadow-hover);
+}
+
+.cooking-mode-card {
+  margin: 2.5rem 0;
+  padding: 1.5rem;
+  background-color: #ffffff;
+  border: 1px solid var(--border-color);
+  border-left: 4px solid var(--primary-color);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  transition: all 0.3s ease;
+}
+
+.cooking-mode-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.card-content {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.icon-wrapper {
+  background-color: rgba(66, 185, 131, 0.1);
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.mode-icon {
+  width: 24px;
+  height: 24px;
+  fill: var(--primary-color);
+}
+
+.info-text {
+  flex: 1;
+}
+
+.badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--primary-color);
+  margin-bottom: 0.25rem;
+}
+
+.info-text h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+.info-text p {
+  margin: 0.25rem 0 0;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.btn-start-mode {
+  width: 100%;
+  padding: 0.8rem;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-start-mode:hover {
+  filter: brightness(1.1);
+}
+
+@media (min-width: 600px) {
+  .cooking-mode-card {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .btn-start-mode {
+    width: auto;
+    padding: 0.8rem 2rem;
+  }
 }
 </style>
