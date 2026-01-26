@@ -73,8 +73,8 @@ const handleLogout = async () => {
         </RouterLink>
 
 
-        <RouterLink to="/settings" class="nav-item mobile-settings-btn" @click="closeMenu">
-          ⚙️ Einstellungen
+        <RouterLink to="/settings" class="nav-item mobile-settings-btn" @click="closeMenu" title="Einstellungen">
+        <img :src="gearSolidFull" alt="Einstellungen" class="settings-icon" /> Einstellungen
         </RouterLink>
       </nav>
     </header>
@@ -277,7 +277,21 @@ const handleLogout = async () => {
     display: none !important;
   }
   .mobile-settings-btn {
-    display: block !important;
+    display: flex !important;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+    color: var(--text-dark);
+    padding: 0.25rem 0.25rem;
+    text-decoration: none;
+  }
+
+  .mobile-settings-btn .settings-icon,
+  .nav-links .mobile-settings-btn .settings-icon {
+    width: 18px;
+    height: 18px;
+    flex: 0 0 auto;
+    filter: invert(26%) sepia(54%) saturate(730%) hue-rotate(221deg) brightness(99%) contrast(91%);
   }
 
   .navbar-right {

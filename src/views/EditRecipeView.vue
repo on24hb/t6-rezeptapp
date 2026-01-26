@@ -18,7 +18,7 @@
           @change="handleImageUpload"
           class="file-input-hidden"
         />
-        
+
         <div v-if="isUploading" style="padding: 1rem; background: #f0f4ff; text-align: center; border-radius: 4px; margin-bottom: 1rem;">
           Bild wird verarbeitet & hochgeladen...
         </div>
@@ -45,12 +45,12 @@
         <textarea v-model="formData.ingredients" id="ingredients" required></textarea>
       </div>
       <div class="form-group">
-        
+
       <div class="label-with-info">
-          <label for="instructions">Anleitung</label>
+          <label for="instructions">Zubereitung</label>
           <div class="info-tooltip">
             <span class="info-icon">i</span>
-            <span class="tooltip-text">Formuliere deine Anleitung in einzelnen Schritten, damit sie in der geführten Ansicht automatisch übernommen wird</span>
+            <span class="tooltip-text">Formuliere deine Zubereitung in einzelnen Schritten, damit sie in der geführten Ansicht automatisch übernommen wird</span>
           </div>
         </div>
          <textarea v-model="formData.instructions" id="instructions" required></textarea>
@@ -143,15 +143,15 @@ const handleImageUpload = async (event: Event) => {
     try {
       if (!auth.currentUser) throw new Error('Nicht angemeldet')
       if (!navigator.onLine) throw new Error('offline')
-      
+
       isUploading.value = true
 
       const compressedBlob = await compressImage(originalFile)
 
       const downloadUrl = await uploadImageFile(compressedBlob, originalFile.name)
-      
+
       if (formData.value) formData.value.imageUrl = downloadUrl
-      
+
     } catch (err) {
       console.error('Upload fehlgeschlagen:', err)
       alert('Fehler beim Hochladen des Bildes')
@@ -181,14 +181,14 @@ const saveRecipe = async () => {
   validationError.value = ''
 
   if (!recipe.value || !formData.value || !recipe.value.id) return
-  
+
   if (!formData.value.ingredients?.trim()) {
     validationError.value = 'Zutaten sind ein Pflichtfeld.'
     return
   }
 
   if (!formData.value.instructions?.trim()) {
-    validationError.value = 'Anleitung ist ein Pflichtfeld.'
+    validationError.value = 'Zubereitung ist ein Pflichtfeld.'
     return
   }
 
@@ -504,6 +504,7 @@ textarea {
   justify-content: center;
   font-weight: 600;
   transition: all 0.2s ease;
+  font-size: 0.95rem;
 }
 
 .btn-save {
