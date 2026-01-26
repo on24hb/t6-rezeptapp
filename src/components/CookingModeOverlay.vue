@@ -200,6 +200,9 @@ const toggleTimer = () => {
       else {
         resetTimer()
         timerSound.play().catch(err => console.log("Audio konnte nicht abgespielt werden:", err))
+        if ('vibrate' in navigator) {
+          navigator.vibrate([200, 100, 200, 100, 200])
+        }
       }
     }, 1000)
   }
