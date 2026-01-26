@@ -22,8 +22,17 @@ const isUploading = ref(false)
 const validationError = ref('')
 
 const DRAFT_KEY = 'recipe_create_draft'
+const DEBOUNCE_DELAY = 1000
 
-watch([title, ingredients, instructions, selectedTags, imageUrl], () => {
+const createDebounce = (fn: () => void, delay: number) => {
+  let timeoutId: ReturnType<typeof setTimeout> | null = null
+  return () => {
+    if (timeoutId) clearTimeout(timeoutId)
+    timeoutId = setTimeout(fn, delay)
+  }
+}
+
+const saveDraft = () => {
   const draftData = {
     title: title.value,
     ingredients: ingredients.value,
@@ -32,6 +41,12 @@ watch([title, ingredients, instructions, selectedTags, imageUrl], () => {
     imageUrl: imageUrl.value
   }
   localStorage.setItem(DRAFT_KEY, JSON.stringify(draftData))
+}
+
+const debouncedSave = createDebounce(saveDraft, DEBOUNCE_DELAY)
+
+watch([title, ingredients, instructions, selectedTags, imageUrl], () => {
+  debouncedSave()
 }, { deep: true })
 
 onMounted(() => {
