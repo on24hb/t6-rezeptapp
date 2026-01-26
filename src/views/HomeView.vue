@@ -2,10 +2,11 @@
 import { ref, computed } from 'vue'
 import RecipeList from '../components/RecipeList.vue'
 import { useRecipeStore } from '@/stores/recipeStore'
-import { AVAILABLE_TAGS } from '@/tags'
+import { useTagsStore } from '@/stores/tagsStore'
 import heartSolidFull from '@/assets/Icons/heart-solid-full.svg'
 
 const store = useRecipeStore()
+const tagsStore = useTagsStore()
 store.fetchRecipes()
 
 const searchTerm = ref('')
@@ -39,7 +40,7 @@ const filteredRecipes = computed(() => {
       
       <select v-model="filterTag" class="filter-select">
         <option value="">Alle Kategorien</option>
-        <option v-for="tag in AVAILABLE_TAGS" :key="tag" :value="tag">
+        <option v-for="tag in tagsStore.tags" :key="tag" :value="tag">
           {{ tag }}
         </option>
       </select>

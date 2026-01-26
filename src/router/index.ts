@@ -4,6 +4,7 @@ import AddRecipeView from '../views/AddRecipeView.vue'
 import RecipeDetailView from '../views/RecipeDetailView.vue'
 import EditRecipeView from '../views/EditRecipeView.vue'
 import LoginView from '../views/LoginView.vue'
+import SettingsView from '../views/SettingsView.vue'
 import { auth } from '../../firebase'
 
 
@@ -34,6 +35,11 @@ const router = createRouter({
       path: '/edit/:id',
       name: 'edit-recipe',
       component: EditRecipeView
+    },
+    {
+      path: '/settings',
+      name: 'settings',
+      component: SettingsView
     }
   ],
 })

@@ -3,6 +3,7 @@ import { useOfflineStore } from '@/stores/offlineStore'
 import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
 import { computed, ref } from 'vue'
+import gearSolidFull from '@/assets/Icons/gear-solid-full.svg'
 
 const authStore = useAuthStore()
 const route = useRoute()
@@ -19,8 +20,6 @@ const toggleMenu = () => {
 const closeMenu = () => {
   isMenuOpen.value = false
 }
-
-// Neues Logout-Verhalten: warte auf logout und navigiere dann zur Login-Seite
 const handleLogout = async () => {
   const ok = await authStore.logout()
   closeMenu()
@@ -65,8 +64,16 @@ const handleLogout = async () => {
             <button @click="handleLogout" class="btn-secondary">Abmelden</button>
         </div>
 
+        <RouterLink to="/settings" class="settings-btn desktop-settings-btn" @click="closeMenu" title="Einstellungen">
+          <img :src="gearSolidFull" alt="Einstellungen" class="settings-icon" />
+        </RouterLink>
+
         <RouterLink to="/add-recipe" class="nav-item btn-add desktop-add-btn" @click="closeMenu">
           ＋ Neues Rezept
+        </RouterLink>
+
+        <RouterLink to="/settings" class="nav-item mobile-settings-btn" @click="closeMenu">
+          ⚙️ Einstellungen
         </RouterLink>
       </nav>
     </header>
@@ -105,6 +112,44 @@ const handleLogout = async () => {
   display: flex;
   align-items: center;
   gap: 1rem;
+  margin-left: auto;
+}
+
+.settings-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  color: var(--primary-color);
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  text-decoration: none;
+}
+
+.desktop-settings-btn {
+  display: flex;
+}
+
+.mobile-settings-btn {
+  display: none;
+}
+
+.settings-icon {
+  width: 24px;
+  height: 24px;
+  filter: invert(26%) sepia(54%) saturate(730%) hue-rotate(221deg) brightness(99%) contrast(91%);
+}
+
+.desktop-settings-btn {
+  display: flex;
+  padding: 0.5rem;
+}
+
+.settings-btn:hover {
+  transform: rotate(30deg);
+  opacity: 0.8;
 }
 
 .mobile-add-btn {
@@ -225,6 +270,13 @@ const handleLogout = async () => {
   }
   .mobile-add-btn {
     display: flex;
+  }
+
+  .desktop-settings-btn {
+    display: none !important;
+  }
+  .mobile-settings-btn {
+    display: block !important;
   }
 
   .navbar-right {
