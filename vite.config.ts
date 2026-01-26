@@ -53,7 +53,24 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,vue}']
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,vue}'],
+        // Caching für Firebase Storage Bilder
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/firebasestorage\.googleapis\.com\/v0\/b\/.*$/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'recipe-images-cache',
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 60 * 60 * 24 * 30,
+              },
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+            },
+          },
+        ],
       }
     }),
     vueDevTools(),
