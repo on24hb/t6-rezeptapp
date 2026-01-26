@@ -67,6 +67,7 @@
   <CookingModeOverlay
       :is-open="isCookingModeActive"
       :steps="steps"
+      :ingredients="recipe ? recipe.ingredients : ''"
       @close="isCookingModeActive = false"
     />
 </template>
