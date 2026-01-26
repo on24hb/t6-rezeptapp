@@ -94,6 +94,7 @@ defineEmits(['start']);
   border-radius: 6px;
   font-weight: 600;
   cursor: pointer;
+  font-size: 0.95rem;
 }
 
 @media (min-width: 600px) {

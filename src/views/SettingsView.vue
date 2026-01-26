@@ -140,7 +140,7 @@ p {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.75rem 1rem;
+  padding: 0.5rem 1rem;
   background-color: #f0f4ff;
   border: 1.5px solid #8873e6;
   border-radius: 8px;
@@ -209,5 +209,45 @@ p {
   background: #405cb8;
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+@media (max-width: 600px) {
+  .settings-page {
+    padding: 1rem;
+  }
+
+  .settings-card {
+    padding: 1.5rem;
+    width: calc(100% - 2rem);
+    box-sizing: border-box;
+    margin: 0 auto 1.5rem;
+  }
+
+  .add-category-section {
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: stretch;
+  }
+
+  .input-field {
+    padding: 0.75rem;
+    font-size: 0.95rem;
+  }
+
+  .btn-add {
+    width: 100%;
+    padding: 0.8rem;
+    font-size: 1rem;
+    align-self: stretch;
+  }
+
+  .tags-list {
+    gap: 0.5rem;
+  }
+
+  .tag-item {
+    width: 100%;
+    justify-content: space-between;
+  }
 }
 </style>

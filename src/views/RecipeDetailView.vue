@@ -44,7 +44,7 @@
       </div>
 
       <div class="section">
-        <h2>Anleitung</h2>
+        <h2>Zubereitung</h2>
         <p>{{ recipe.instructions }}</p>
       </div>
 
