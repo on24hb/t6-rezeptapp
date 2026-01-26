@@ -7,7 +7,19 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 import { VitePWA } from 'vite-plugin-pwa'
 
 // https://vite.dev/config/
+
 export default defineConfig({
+  
+    build: {
+    chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'firebase-vendor': ['firebase/app', 'firebase/firestore', 'firebase/auth', 'firebase/storage'],
+        },
+      },
+    },
+  },
   plugins: [
     vue(),
     VitePWA({
