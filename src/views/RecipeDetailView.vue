@@ -20,7 +20,6 @@
               <path d="M213.1 128.8L202.7 160L128 160C92.7 160 64 188.7 64 224L64 480C64 515.3 92.7 544 128 544L512 544C547.3 544 576 515.3 576 480L576 224C576 188.7 547.3 160 512 160L437.3 160L426.9 128.8C420.4 109.2 402.1 96 381.4 96L258.6 96C237.9 96 219.6 109.2 213.1 128.8zM320 256C373 256 416 299 416 352C416 405 373 448 320 448C267 448 224 405 224 352C224 299 267 256 320 256z"/>
             </svg>
           </button>
-          
           <input
             ref="fileInput"
             type="file"
@@ -60,11 +59,20 @@
     <div v-else>
       <p>Rezept nicht gefunden</p>
     </div>
+  <CookingModeCard
+        :step-count="steps.length"
+        @start="isCookingModeActive = true"
+  />
   </div>
+  <CookingModeOverlay
+      :is-open="isCookingModeActive"
+      :steps="steps"
+      @close="isCookingModeActive = false"
+    />
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useRecipeStore } from '@/stores/recipeStore'
 import type { Recipe } from '@/types/Recipe'
@@ -72,13 +80,16 @@ import heartSolidFull from '@/assets/Icons/heart-solid-full.svg'
 import heartRegularFull from '@/assets/Icons/heart-regular-full.svg'
 import { storage, auth } from '../../firebase'
 import { ref as sRef, uploadBytes, getDownloadURL } from 'firebase/storage'
+import CookingModeOverlay from '@/components/CookingModeOverlay.vue'
+import CookingModeCard from '@/components/CookingModeCard.vue'
 
 const route = useRoute()
 const router = useRouter()
 const recipeStore = useRecipeStore()
 const recipe = ref<Recipe | null>(null)
 const fileInput = ref<HTMLInputElement | null>(null)
-const isUploading = ref(false) 
+const isUploading = ref(false)
+const isCookingModeActive = ref(false)
 
 const triggerImageUpload = () => {
   fileInput.value?.click()
@@ -118,7 +129,7 @@ const handleImageUpload = async (event: Event) => {
   const input = event.target as HTMLInputElement
   if (input.files && input.files[0] && recipe.value) {
     const file = input.files[0]
-    
+
     if (!auth.currentUser) {
       alert('Bitte melde dich an, um ein Bild hochzuladen.')
       return
@@ -126,7 +137,7 @@ const handleImageUpload = async (event: Event) => {
 
     try {
       isUploading.value = true
-      
+
       const compressedBlob = await compressImage(file)
 
       const path = `recipes/${auth.currentUser.uid}/${Date.now()}_${file.name.replace(/\.[^/.]+$/, "")}.jpg`
@@ -195,6 +206,15 @@ const toggleFavorite = async () => {
     console.error('Error toggling favorite:', err)
   }
 }
+
+// Berechnet die Koch-Schritte basierend auf Zeilenumbrüchen
+const steps = computed(() => {
+  if (!recipe.value?.instructions) return []
+  return recipe.value.instructions
+    .split('\n')
+    .map(s => s.trim())
+    .filter(s => s.length > 0)
+})
 </script>
 
 <style scoped>
