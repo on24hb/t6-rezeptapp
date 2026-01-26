@@ -66,13 +66,14 @@
 </template>
 
 <script setup lang="ts">
-// (Der Script Teil bleibt im Wesentlichen gleich, keine Änderungen an der Logik hier notwendig)
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useRecipeStore } from '@/stores/recipeStore'
 import type { Recipe } from '@/types/Recipe'
 import heartSolidFull from '@/assets/Icons/heart-solid-full.svg'
 import heartRegularFull from '@/assets/Icons/heart-regular-full.svg'
+import { storage, auth } from '../../firebase'
+import { ref as sRef, uploadBytes, getDownloadURL } from 'firebase/storage'
 
 const route = useRoute()
 const router = useRouter()
@@ -84,19 +85,32 @@ const triggerImageUpload = () => {
   fileInput.value?.click()
 }
 
-const handleImageUpload = (event: Event) => {
+const handleImageUpload = async (event: Event) => {
   const input = event.target as HTMLInputElement
   if (input.files && input.files[0] && recipe.value) {
     const file = input.files[0]
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      if (recipe.value) {
-        recipe.value.imageUrl = e.target?.result as string
-        // Speichern des Bildes
-        updateRecipeImage()
-      }
+    
+    if (!auth.currentUser) {
+      alert('Bitte melde dich an, um ein Bild hochzuladen.')
+      return
     }
-    reader.readAsDataURL(file)
+
+    try {
+      const path = `recipes/${auth.currentUser.uid}/${Date.now()}_${file.name}`
+      const storageRef = sRef(storage, path)
+
+      await uploadBytes(storageRef, file)
+
+      const downloadUrl = await getDownloadURL(storageRef)
+
+      recipe.value.imageUrl = downloadUrl
+
+      await updateRecipeImage()
+
+    } catch (err) {
+      console.error('Fehler beim Upload:', err)
+      alert('Fehler beim Hochladen des Bildes. Bitte versuchen Sie es erneut.')
+    }
   }
 }
 
