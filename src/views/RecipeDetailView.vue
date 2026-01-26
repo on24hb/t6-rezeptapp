@@ -3,7 +3,8 @@
     <div v-if="recipe" class="detail-container">
 
       <div v-if="recipe.imageUrl" class="image-section">
-        <img :src="recipe.imageUrl" :alt="recipe.title" class="recipe-image" />
+        <img :src="recipe.imageUrl" :alt="recipe.title" class="recipe-image" :style="{ opacity: isUploading ? 0.5 : 1 }" />
+        <div v-if="isUploading" style="position:absolute; color: white; background: rgba(0,0,0,0.5); padding: 5px;">Lädt...</div>
       </div>
 
       <div class="title-section">
@@ -13,30 +14,27 @@
             @click="triggerImageUpload"
             class="camera-btn-detail"
             title="Foto hinzufügen oder ändern"
+            :disabled="isUploading"
           >
             <svg class="camera-icon-detail" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
               <path d="M213.1 128.8L202.7 160L128 160C92.7 160 64 188.7 64 224L64 480C64 515.3 92.7 544 128 544L512 544C547.3 544 576 515.3 576 480L576 224C576 188.7 547.3 160 512 160L437.3 160L426.9 128.8C420.4 109.2 402.1 96 381.4 96L258.6 96C237.9 96 219.6 109.2 213.1 128.8zM320 256C373 256 416 299 416 352C416 405 373 448 320 448C267 448 224 405 224 352C224 299 267 256 320 256z"/>
             </svg>
           </button>
+          
           <input
             ref="fileInput"
             type="file"
             accept="image/*"
-            capture="environment"
             @change="handleImageUpload"
             class="file-input-hidden"
           />
+
           <button
             @click="toggleFavorite"
             class="favorite-btn-detail"
             :class="{ 'is-favorite': recipe.isFavorite }"
-            :title="recipe.isFavorite ? 'Aus Favoriten entfernen' : 'Zu Favoriten hinzufügen'"
           >
-            <img
-              :src="recipe.isFavorite ? heartSolidFull : heartRegularFull"
-              alt="Herz"
-              class="heart-icon-detail"
-            />
+             <img :src="recipe.isFavorite ? heartSolidFull : heartRegularFull" alt="Herz" class="heart-icon-detail"/>
           </button>
         </div>
       </div>
@@ -66,43 +64,92 @@
 </template>
 
 <script setup lang="ts">
-// (Der Script Teil bleibt im Wesentlichen gleich, keine Änderungen an der Logik hier notwendig)
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useRecipeStore } from '@/stores/recipeStore'
 import type { Recipe } from '@/types/Recipe'
 import heartSolidFull from '@/assets/Icons/heart-solid-full.svg'
 import heartRegularFull from '@/assets/Icons/heart-regular-full.svg'
+import { storage, auth } from '../../firebase'
+import { ref as sRef, uploadBytes, getDownloadURL } from 'firebase/storage'
 
 const route = useRoute()
 const router = useRouter()
 const recipeStore = useRecipeStore()
 const recipe = ref<Recipe | null>(null)
 const fileInput = ref<HTMLInputElement | null>(null)
+const isUploading = ref(false) 
 
 const triggerImageUpload = () => {
   fileInput.value?.click()
 }
 
-const handleImageUpload = (event: Event) => {
+const compressImage = async (file: File, maxWidth = 1200, quality = 0.8): Promise<Blob> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.readAsDataURL(file)
+    reader.onload = (event) => {
+      const img = new Image()
+      img.src = event.target?.result as string
+      img.onload = () => {
+        let width = img.width
+        let height = img.height
+        if (width > maxWidth) {
+          height = (height * maxWidth) / width
+          width = maxWidth
+        }
+        const canvas = document.createElement('canvas')
+        canvas.width = width
+        canvas.height = height
+        const ctx = canvas.getContext('2d')
+        ctx?.drawImage(img, 0, 0, width, height)
+        canvas.toBlob((blob) => {
+          if (blob) resolve(blob)
+          else reject(new Error('Error compressing image'))
+        }, 'image/jpeg', quality)
+      }
+      img.onerror = (err) => reject(err)
+    }
+    reader.onerror = (err) => reject(err)
+  })
+}
+
+const handleImageUpload = async (event: Event) => {
   const input = event.target as HTMLInputElement
   if (input.files && input.files[0] && recipe.value) {
     const file = input.files[0]
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      if (recipe.value) {
-        recipe.value.imageUrl = e.target?.result as string
-        // Speichern des Bildes
-        updateRecipeImage()
-      }
+    
+    if (!auth.currentUser) {
+      alert('Bitte melde dich an.')
+      return
     }
-    reader.readAsDataURL(file)
+
+    try {
+      isUploading.value = true
+      
+      const compressedBlob = await compressImage(file)
+
+      const path = `recipes/${auth.currentUser.uid}/${Date.now()}_${file.name.replace(/\.[^/.]+$/, "")}.jpg`
+      const storageRef = sRef(storage, path)
+
+      await uploadBytes(storageRef, compressedBlob)
+
+      const downloadUrl = await getDownloadURL(storageRef)
+
+      recipe.value.imageUrl = downloadUrl
+      await updateRecipeImage()
+
+    } catch (err) {
+      console.error('Fehler beim Upload:', err)
+      alert('Fehler beim Hochladen.')
+    } finally {
+      isUploading.value = false
+    }
   }
 }
 
 const updateRecipeImage = async () => {
   if (!recipe.value?.id) return
-
   try {
     await recipeStore.updateRecipe(recipe.value.id, { imageUrl: recipe.value.imageUrl })
   } catch (err) {
@@ -118,7 +165,6 @@ onMounted(async () => {
     await recipeStore.fetchRecipesOnce()
     found = recipeStore.recipes.find(r => r.id === recipeId)
   }
-
   if (found) {
     recipe.value = found
   }
@@ -126,7 +172,6 @@ onMounted(async () => {
 
 const confirmDelete = async () => {
   if (!recipe.value?.id) return
-
   if (confirm('Möchtest du dieses Rezept wirklich löschen?')) {
     try {
       await recipeStore.deleteRecipe(recipe.value.id)
@@ -140,7 +185,6 @@ const confirmDelete = async () => {
 
 const toggleFavorite = async () => {
   if (!recipe.value?.id) return
-
   try {
     await recipeStore.toggleFavorite(recipe.value.id)
     if (recipe.value) {

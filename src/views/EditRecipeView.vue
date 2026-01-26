@@ -14,21 +14,23 @@
           ref="fileInput"
           type="file"
           accept="image/*"
-          capture="environment"
           @change="handleImageUpload"
           class="file-input-hidden"
         />
-        <div v-if="formData && formData.imageUrl" class="preview-container">
+        
+        <div v-if="isUploading" style="padding: 1rem; background: #f0f4ff; text-align: center; border-radius: 4px; margin-bottom: 1rem;">
+          Bild wird verarbeitet & hochgeladen...
+        </div>
+
+        <div v-if="formData && formData.imageUrl && !isUploading" class="preview-container">
           <img :src="formData.imageUrl" alt="Vorschau" class="image-preview" />
           <button type="button" @click="removeImage" class="remove-btn">Foto entfernen</button>
         </div>
-        <div v-else class="camera-upload-prompt">
+        <div v-else-if="!isUploading" class="camera-upload-prompt">
           <button type="button" @click="triggerFileInput" class="camera-icon-btn" title="Foto hinzufügen">
-            <svg class="camera-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
-              <path d="M213.1 128.8L202.7 160L128 160C92.7 160 64 188.7 64 224L64 480C64 515.3 92.7 544 128 544L512 544C547.3 544 576 515.3 576 480L576 224C576 188.7 547.3 160 512 160L437.3 160L426.9 128.8C420.4 109.2 402.1 96 381.4 96L258.6 96C237.9 96 219.6 109.2 213.1 128.8zM320 256C373 256 416 299 416 352C416 405 373 448 320 448C267 448 224 405 224 352C224 299 267 256 320 256z"/>
-            </svg>
+             <svg class="camera-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><path d="M213.1 128.8L202.7 160L128 160C92.7 160 64 188.7 64 224L64 480C64 515.3 92.7 544 128 544L512 544C547.3 544 576 515.3 576 480L576 224C576 188.7 547.3 160 512 160L437.3 160L426.9 128.8C420.4 109.2 402.1 96 381.4 96L258.6 96C237.9 96 219.6 109.2 213.1 128.8zM320 256C373 256 416 299 416 352C416 405 373 448 320 448C267 448 224 405 224 352C224 299 267 256 320 256z"/></svg>
           </button>
-          <p class="upload-text">Klicke auf das Kamera-Icon um ein Foto hinzuzufügen</p>
+          <p class="upload-text">Foto hinzufügen</p>
         </div>
       </div>
 
@@ -36,14 +38,15 @@
         <label for="ingredients">Zutaten</label>
         <textarea v-model="formData.ingredients" id="ingredients" required></textarea>
       </div>
-
       <div class="form-group">
         <label for="instructions">Anleitung</label>
         <textarea v-model="formData.instructions" id="instructions" required></textarea>
       </div>
 
       <div class="actions">
-        <button type="submit" class="btn btn-save">Speichern</button>
+        <button type="submit" class="btn btn-save" :disabled="isUploading">
+          {{ isUploading ? 'Bild lädt...' : 'Speichern' }}
+        </button>
         <router-link :to="cancelUrl" class="btn btn-cancel">Abbrechen</router-link>
       </div>
     </form>
@@ -66,6 +69,7 @@ type FormRecipe = Partial<Recipe> & { imageUrl?: string | null }
 const recipe = ref<Recipe | null>(null)
 const formData = ref<FormRecipe | null>(null)
 const fileInput = ref<HTMLInputElement | null>(null)
+const isUploading = ref(false) 
 
 const cancelUrl = computed(() => `/`)
 
@@ -89,26 +93,68 @@ onMounted(async () => {
   }
 })
 
+const compressImage = async (file: File, maxWidth = 1200, quality = 0.8): Promise<Blob> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.readAsDataURL(file)
+    reader.onload = (event) => {
+      const img = new Image()
+      img.src = event.target?.result as string
+      img.onload = () => {
+        let width = img.width
+        let height = img.height
+        if (width > maxWidth) {
+          height = (height * maxWidth) / width
+          width = maxWidth
+        }
+        const canvas = document.createElement('canvas')
+        canvas.width = width
+        canvas.height = height
+        const ctx = canvas.getContext('2d')
+        ctx?.drawImage(img, 0, 0, width, height)
+        canvas.toBlob((blob) => {
+          if (blob) resolve(blob)
+          else reject(new Error('Bild konnte nicht verarbeitet werden'))
+        }, 'image/jpeg', quality)
+      }
+      img.onerror = (err) => reject(err)
+    }
+    reader.onerror = (err) => reject(err)
+  })
+}
+
+async function uploadImageFile(fileBlob: Blob, fileName: string) {
+  if (!auth.currentUser) throw new Error('Nicht angemeldet')
+  const path = `recipes/${auth.currentUser.uid}/${Date.now()}_${fileName.replace(/\.[^/.]+$/, "")}.jpg`
+  const storageRef = sRef(storage, path)
+  await uploadBytes(storageRef, fileBlob)
+  return await getDownloadURL(storageRef)
+}
+
 const handleImageUpload = async (event: Event) => {
   const input = event.target as HTMLInputElement
   if (input.files && input.files[0] && formData.value) {
-    const file = input.files[0]
+    const originalFile = input.files[0]
 
-    // Sofort lokale Vorschau
-    formData.value.imageUrl = URL.createObjectURL(file)
+    formData.value.imageUrl = URL.createObjectURL(originalFile)
 
-    // Upload zum Firebase Storage
     try {
       if (!auth.currentUser) throw new Error('Nicht angemeldet')
       if (!navigator.onLine) throw new Error('offline')
-      const path = `recipes/${auth.currentUser.uid}/${Date.now()}_${file.name}`
-      const storageRef = sRef(storage, path)
-      await uploadBytes(storageRef, file)
-      const downloadUrl = await getDownloadURL(storageRef)
+      
+      isUploading.value = true
+
+      const compressedBlob = await compressImage(originalFile)
+
+      const downloadUrl = await uploadImageFile(compressedBlob, originalFile.name)
+      
       if (formData.value) formData.value.imageUrl = downloadUrl
+      
     } catch (err) {
       console.error('Upload fehlgeschlagen:', err)
       alert('Fehler beim Hochladen des Bildes')
+    } finally {
+      isUploading.value = false
     }
   }
 }
@@ -119,54 +165,37 @@ const removeImage = () => {
   if (!confirm('Möchtest du das Bild wirklich entfernen?')) {
     return
   }
-
-  // Lokale Blob-URL widerrufen, falls vorhanden
   try {
     const url = formData.value.imageUrl
     if (url && url.startsWith('blob:')) {
       URL.revokeObjectURL(url)
     }
-  } catch {
-    // Ignorieren
-  }
+  } catch {}
 
-  // Setze imageUrl auf null, um das Bild zu entfernen
   formData.value = ({ ...formData.value, imageUrl: null } as FormRecipe)
 }
 
 const saveRecipe = async () => {
   if (!recipe.value || !formData.value || !recipe.value.id) return
+  
+  if (isUploading.value) {
+    alert('Bitte warte, bis das Bild hochgeladen ist.')
+    return
+  }
 
   try {
-    // Wenn der Nutzer das Bild entfernt hat, Datei auch aus dem Firebase Storage löschen
     if (formData.value.imageUrl === null && recipe.value.imageUrl && recipe.value.imageUrl.startsWith('http')) {
-      try {
+       try {
         const downloadUrl = recipe.value.imageUrl as string
-        // Extrahiere den Pfad aus der Download-URL. Download-URLs enthalten '/o/<encoded-path>?'
         const match = downloadUrl.match(/\/o\/([^?]+)/)
         if (match && match[1]) {
           const storagePath = decodeURIComponent(match[1])
           const oldRef = sRef(storage, storagePath)
           await deleteObject(oldRef)
-          console.log('Altes Bild im Storage gelöscht (Pfad)')
-        } else {
-          // Fallback: Versuche, die URL direkt zu verwenden
-          try {
-            const oldRef = sRef(storage, downloadUrl)
-            await deleteObject(oldRef)
-            console.log('Altes Bild im Storage gelöscht (URL-Fallback)')
-          } catch (innerErr) {
-            console.warn('Konnte altes Bild im Storage nicht löschen (Fallback):', innerErr)
-          }
         }
-      } catch (err) {
-        console.warn('Konnte altes Bild im Storage nicht löschen:', err)
-        // Nicht kritisch, daher nur Warnung
-      }
+      } catch (e) { console.warn(e) }
     }
 
-    // Behalte den Wert von imageUrl bei (kann string, undefined oder null sein).
-    // Der Store behandelt `null` als Anfrage, das Feld in Firestore zu löschen.
     const updateData = { ...formData.value } as unknown as Partial<Recipe>
     await recipeStore.updateRecipe(recipe.value.id, updateData)
     router.push(`/recipe/${recipe.value.id}`)
