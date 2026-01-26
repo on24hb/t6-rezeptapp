@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useRecipeStore } from '@/stores/recipeStore'
 import { AVAILABLE_TAGS } from '@/tags'
@@ -11,6 +11,7 @@ const router = useRouter()
 
 const store = useRecipeStore()
 const fileInput = ref<HTMLInputElement | null>(null)
+
 const title = ref('')
 const ingredients = ref('')
 const instructions = ref('')
@@ -18,11 +19,73 @@ const selectedTags = ref<string[]>([])
 const imageUrl = ref<string | null>(null)
 const isUploading = ref(false)
 
-async function uploadImageFile(file: File) {
+const DRAFT_KEY = 'recipe_create_draft'
+
+watch([title, ingredients, instructions, selectedTags, imageUrl], () => {
+  const draftData = {
+    title: title.value,
+    ingredients: ingredients.value,
+    instructions: instructions.value,
+    selectedTags: selectedTags.value,
+    imageUrl: imageUrl.value
+  }
+  localStorage.setItem(DRAFT_KEY, JSON.stringify(draftData))
+}, { deep: true })
+
+onMounted(() => {
+  const savedDraft = localStorage.getItem(DRAFT_KEY)
+  if (savedDraft) {
+    try {
+      const parsed = JSON.parse(savedDraft)
+      if (parsed.title) title.value = parsed.title
+      if (parsed.ingredients) ingredients.value = parsed.ingredients
+      if (parsed.instructions) instructions.value = parsed.instructions
+      if (parsed.selectedTags) selectedTags.value = parsed.selectedTags
+      if (parsed.imageUrl) imageUrl.value = parsed.imageUrl
+    } catch (e) {
+      console.error('Fehler beim Laden des Entwurfs', e)
+    }
+  }
+})
+
+const compressImage = async (file: File, maxWidth = 1200, quality = 0.8): Promise<Blob> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.readAsDataURL(file)
+    reader.onload = (event) => {
+      const img = new Image()
+      img.src = event.target?.result as string
+      img.onload = () => {
+        let width = img.width
+        let height = img.height
+        if (width > maxWidth) {
+          height = (height * maxWidth) / width
+          width = maxWidth
+        }
+        
+        const canvas = document.createElement('canvas')
+        canvas.width = width
+        canvas.height = height
+        
+        const ctx = canvas.getContext('2d')
+        ctx?.drawImage(img, 0, 0, width, height)
+        
+        canvas.toBlob((blob) => {
+          if (blob) resolve(blob)
+          else reject(new Error('Bild konnte nicht verarbeitet werden'))
+        }, 'image/jpeg', quality)
+      }
+      img.onerror = (err) => reject(err)
+    }
+    reader.onerror = (err) => reject(err)
+  })
+}
+
+async function uploadImageFile(fileBlob: Blob, fileName: string) {
   if (!auth.currentUser) throw new Error('Nicht angemeldet')
-  const path = `recipes/${auth.currentUser.uid}/${Date.now()}_${file.name}`
+  const path = `recipes/${auth.currentUser.uid}/${Date.now()}_${fileName.replace(/\.[^/.]+$/, "")}.jpg`
   const storageRef = sRef(storage, path)
-  await uploadBytes(storageRef, file)
+  await uploadBytes(storageRef, fileBlob)
   return await getDownloadURL(storageRef)
 }
 
@@ -33,50 +96,57 @@ const triggerFileInput = () => {
 const handleImageUpload = async (event: Event) => {
   const input = event.target as HTMLInputElement
   if (input.files && input.files[0]) {
-    const file = input.files[0]
-    // Sofort eine lokale Vorschau anzeigen
-    imageUrl.value = URL.createObjectURL(file)
+    const originalFile = input.files[0]
+    imageUrl.value = URL.createObjectURL(originalFile)
 
-    // Upload in Storage starten
     try {
       if (!navigator.onLine) throw new Error('offline')
       isUploading.value = true
-      const downloadUrl = await uploadImageFile(file)
+
+      console.log('Komprimiere Bild...')
+      const compressedBlob = await compressImage(originalFile)
+      
+      console.log('Starte Upload...')
+      const downloadUrl = await uploadImageFile(compressedBlob, originalFile.name)
+      
       imageUrl.value = downloadUrl
     } catch (err) {
       console.error('Upload fehlgeschlagen:', err)
-      alert('Fehler beim Hochladen des Bildes')
+      alert('Fehler beim Hochladen: ' + (err instanceof Error ? err.message : 'Unbekannter Fehler'))
+      imageUrl.value = null
     } finally {
       isUploading.value = false
+      input.value = ''
     }
   }
 }
 
 const removeImage = async () => {
-if (!imageUrl.value) return
-
+  if (!imageUrl.value) return
   const urlToDelete = imageUrl.value
-
   if (urlToDelete.startsWith('http')) {
     try {
       const storageRef = sRef(storage, urlToDelete)
       await deleteObject(storageRef)
-      console.log('Bild erfolgreich aus Storage gelöscht')
     } catch (err) {
-      console.error('Löschen im Storage fehlgeschlagen (evtl. schon weg):', err)
+      console.error('Löschen fehlgeschlagen:', err)
     }
   }
-
   imageUrl.value = null
 }
 
 const submit = async () => {
   if (!navigator.onLine) {
-    alert('Du bist offline - Neue Rezepte können nicht gespeichert werden. Versuche es später erneut.')
+    alert('Du bist offline.')
+    return
+  }
+  if (!title.value) return
+
+  if (isUploading.value) {
+    alert('Bitte warte kurz, das Bild wird noch hochgeladen.')
     return
   }
 
-  if (!title.value) return
   await store.addRecipe({
     title: title.value,
     ingredients: ingredients.value,
@@ -86,9 +156,9 @@ const submit = async () => {
     createdAt: new Date(),
   })
 
+  localStorage.removeItem(DRAFT_KEY)
   emit('saved')
-
-  // Felder leeren
+  
   title.value = ''
   ingredients.value = ''
   instructions.value = ''
@@ -97,7 +167,10 @@ const submit = async () => {
 }
 
 const handleCancel = () => {
-  router.push('/')
+  if(confirm('Möchtest du wirklich abbrechen?')) {
+    localStorage.removeItem(DRAFT_KEY)
+    router.push('/')
+  }
 }
 </script>
 
@@ -117,22 +190,26 @@ const handleCancel = () => {
               ref="fileInput"
               type="file"
               accept="image/*"
-              capture="environment"
               @change="handleImageUpload"
               class="file-input-hidden"
             />
 
-            <div v-if="imageUrl" class="preview-container">
+            <div v-if="isUploading" class="upload-status">
+              <p>Bild wird verarbeitet & hochgeladen...</p>
+            </div>
+
+            <div v-if="imageUrl && !isUploading" class="preview-container">
               <img :src="imageUrl" alt="Vorschau" class="image-preview" />
               <button type="button" @click="removeImage" class="remove-btn">Foto entfernen</button>
             </div>
-            <div v-else class="camera-upload-prompt">
+            
+            <div v-else-if="!isUploading" class="camera-upload-prompt">
               <button type="button" @click="triggerFileInput" class="camera-icon-btn" title="Foto hinzufügen">
                 <svg class="camera-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
                   <path d="M213.1 128.8L202.7 160L128 160C92.7 160 64 188.7 64 224L64 480C64 515.3 92.7 544 128 544L512 544C547.3 544 576 515.3 576 480L576 224C576 188.7 547.3 160 512 160L437.3 160L426.9 128.8C420.4 109.2 402.1 96 381.4 96L258.6 96C237.9 96 219.6 109.2 213.1 128.8zM320 256C373 256 416 299 416 352C416 405 373 448 320 448C267 448 224 405 224 352C224 299 267 256 320 256z"/>
                 </svg>
               </button>
-              <p class="upload-text">Klicke auf das Kamera-Icon um ein Foto hinzuzufügen</p>
+              <p class="upload-text">Tippe hier für Foto oder Mediathek</p>
             </div>
           </div>
         </div>
@@ -162,7 +239,9 @@ const handleCancel = () => {
         </div>
 
         <div class="button-group">
-          <button class="save-button" type="submit">Speichern</button>
+          <button class="save-button" type="submit" :disabled="isUploading">
+            {{ isUploading ? 'Bild lädt...' : 'Speichern' }}
+          </button>
           <button class="cancel-button" type="button" @click="handleCancel">Abbrechen</button>
         </div>
       </form>
@@ -171,6 +250,14 @@ const handleCancel = () => {
 </template>
 
 <style scoped>
+.upload-status {
+  padding: 2rem;
+  text-align: center;
+  background: #f0f4ff;
+  border-radius: 8px;
+  color: #4868d1;
+  font-weight: bold;
+}
 .page-title {
   margin-bottom: 2.5rem;
   color: #333;
