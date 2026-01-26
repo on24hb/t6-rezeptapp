@@ -2,7 +2,7 @@
 import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useRecipeStore } from '@/stores/recipeStore'
-import { AVAILABLE_TAGS } from '@/tags'
+import { useTagsStore } from '@/stores/tagsStore'
 import { storage, auth } from '../../firebase'
 import { ref as sRef, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage'
 
@@ -10,6 +10,7 @@ const emit = defineEmits(['saved'])
 const router = useRouter()
 
 const store = useRecipeStore()
+const tagsStore = useTagsStore()
 const fileInput = ref<HTMLInputElement | null>(null)
 
 const title = ref('')
@@ -18,6 +19,7 @@ const instructions = ref('')
 const selectedTags = ref<string[]>([])
 const imageUrl = ref<string | null>(null)
 const isUploading = ref(false)
+const validationError = ref('')
 
 const DRAFT_KEY = 'recipe_create_draft'
 
@@ -136,11 +138,27 @@ const removeImage = async () => {
 }
 
 const submit = async () => {
+  validationError.value = ''
+
   if (!navigator.onLine) {
     alert('Du bist offline.')
     return
   }
-  if (!title.value) return
+
+  if (!title.value.trim()) {
+    validationError.value = 'Bitte gib einen Rezeptnamen ein.'
+    return
+  }
+
+  if (!ingredients.value.trim()) {
+    validationError.value = 'Zutaten sind ein Pflichtfeld.'
+    return
+  }
+
+  if (!instructions.value.trim()) {
+    validationError.value = 'Anleitung ist ein Pflichtfeld.'
+    return
+  }
 
   if (isUploading.value) {
     alert('Bitte warte kurz, das Bild wird noch hochgeladen.')
@@ -164,6 +182,7 @@ const submit = async () => {
   instructions.value = ''
   selectedTags.value = []
   imageUrl.value = null
+  validationError.value = ''
 }
 
 const handleCancel = () => {
@@ -231,11 +250,15 @@ const handleCancel = () => {
         <div class="form-group">
           <label>Kategorien</label>
           <div class="tags-selection">
-            <label v-for="tag in AVAILABLE_TAGS" :key="tag" class="checkbox-label">
+            <label v-for="tag in tagsStore.tags" :key="tag" class="checkbox-label">
               <input type="checkbox" :value="tag" v-model="selectedTags">
               {{ tag }}
             </label>
           </div>
+        </div>
+
+        <div v-if="validationError" class="error-message">
+          {{ validationError }}
         </div>
 
         <div class="button-group">
@@ -460,6 +483,16 @@ form {
   border-color: #8873e6;
   color: white;
   box-shadow: 0 2px 4px rgba(136, 115, 230, 0.3);
+}
+
+.error-message {
+  padding: 0.75rem;
+  background-color: #ffebee;
+  color: #c62828;
+  border: 1px solid #ef5350;
+  border-radius: 8px;
+  font-weight: 500;
+  margin-bottom: 1rem;
 }
 
 @media (hover: hover) {

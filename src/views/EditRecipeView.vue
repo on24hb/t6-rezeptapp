@@ -1,8 +1,9 @@
 <template>
   <div class="edit-recipe">
-    <h1>Rezept bearbeiten</h1>
+    <div class="detail-container" v-if="formData">
+      <h1>Rezept bearbeiten</h1>
 
-    <form @submit.prevent="saveRecipe" v-if="formData">
+      <form @submit.prevent="saveRecipe">
       <div class="form-group">
         <label for="title">Rezeptname</label>
         <input v-model="formData.title" id="title" type="text" required>
@@ -48,13 +49,28 @@
         <textarea v-model="formData.instructions" id="instructions" required></textarea>
       </div>
 
+      <div class="form-group">
+        <label>Kategorien</label>
+        <div class="tags-selection">
+          <label v-for="tag in tagsStore.tags" :key="tag" class="checkbox-label">
+            <input type="checkbox" :value="tag" v-model="formData.tags">
+            {{ tag }}
+          </label>
+        </div>
+      </div>
+
+      <div v-if="validationError" class="error-message">
+        {{ validationError }}
+      </div>
+
       <div class="actions">
         <button type="submit" class="btn btn-save" :disabled="isUploading">
           {{ isUploading ? 'Bild lädt...' : 'Speichern' }}
         </button>
         <router-link :to="cancelUrl" class="btn btn-cancel">Abbrechen</router-link>
       </div>
-    </form>
+      </form>
+    </div>
   </div>
 </template>
 
@@ -62,6 +78,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useRecipeStore } from '@/stores/recipeStore'
+import { useTagsStore } from '@/stores/tagsStore'
 import type { Recipe } from '@/types/Recipe'
 import { storage, auth } from '../../firebase'
 import { ref as sRef, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage'
@@ -69,12 +86,14 @@ import { ref as sRef, uploadBytes, getDownloadURL, deleteObject } from 'firebase
 const route = useRoute()
 const router = useRouter()
 const recipeStore = useRecipeStore()
+const tagsStore = useTagsStore()
 
 type FormRecipe = Partial<Recipe> & { imageUrl?: string | null }
 const recipe = ref<Recipe | null>(null)
 const formData = ref<FormRecipe | null>(null)
 const fileInput = ref<HTMLInputElement | null>(null)
-const isUploading = ref(false) 
+const isUploading = ref(false)
+const validationError = ref('')
 
 const cancelUrl = computed(() => `/`)
 
@@ -181,8 +200,20 @@ const removeImage = () => {
 }
 
 const saveRecipe = async () => {
+  validationError.value = ''
+
   if (!recipe.value || !formData.value || !recipe.value.id) return
   
+  if (!formData.value.ingredients?.trim()) {
+    validationError.value = 'Zutaten sind ein Pflichtfeld.'
+    return
+  }
+
+  if (!formData.value.instructions?.trim()) {
+    validationError.value = 'Anleitung ist ein Pflichtfeld.'
+    return
+  }
+
   if (isUploading.value) {
     alert('Bitte warte, bis das Bild hochgeladen ist.')
     return
@@ -213,36 +244,57 @@ const saveRecipe = async () => {
 
 <style scoped>
 .edit-recipe {
-  padding: 20px;
-  max-width: 600px;
+  padding: 1rem;
+}
+
+.detail-container {
+  max-width: 800px;
   margin: 0 auto;
+  background: var(--card-background);
+  padding: 2.5rem;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--box-shadow);
+}
+
+h1 {
+  margin: 0 0 2rem 0;
+  color: var(--primary-color);
+  font-size: 1.8rem;
 }
 
 .form-group {
-  margin: 15px 0;
+  margin-bottom: 1.5rem;
   display: flex;
   flex-direction: column;
-  min-width: 0;
-}
-h1 {
-  overflow-wrap: break-word; 
-  word-break: break-word;
 }
 
 label {
-  margin-bottom: 5px;
-  font-weight: bold;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  font-size: 0.95rem;
 }
 
-input[type="text"], textarea {
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+input[type="text"],
+textarea {
+  padding: 0.8rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
   font-family: inherit;
+  font-size: 1rem;
+  background-color: #fafafa;
+}
+
+input[type="text"]:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  background-color: white;
 }
 
 textarea {
-  min-height: 150px;
+  min-height: 120px;
   resize: vertical;
 }
 
@@ -250,13 +302,12 @@ textarea {
   display: none;
 }
 
-
 .camera-upload-prompt {
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 2rem 1rem;
-  border: 2px dashed #4868d1;
+  border: 2px dashed var(--primary-color);
   border-radius: 8px;
   background-color: #f0f4ff;
 }
@@ -281,8 +332,8 @@ textarea {
 .camera-icon {
   width: 3rem;
   height: 3rem;
-  color: #4868d1;
-  fill: #4868d1;
+  color: var(--primary-color);
+  fill: var(--primary-color);
 }
 
 .upload-text {
@@ -295,35 +346,34 @@ textarea {
 .preview-container {
   margin-top: 1rem;
   position: relative;
-  display: block;
-
-}.image-preview {
-  width: 100%;
-  height: 300px;
-  border-radius: 4px;
-  border: 1px solid #ddd;
-  object-fit: cover;
-  display: block;
-  
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-
+.image-preview {
+  max-width: 100%;
+  max-height: 300px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  object-fit: contain;
+}
 
 .remove-btn {
   position: absolute;
-  top: -10px;    
-  right: -10px;  
+  top: -10px;
+  right: -10px;
   background: #da6834;
   color: white;
-  border: 2px solid white; 
+  border: 2px solid white;
   width: 32px;
   height: 32px;
-  border-radius: 50%; 
+  border-radius: 50%;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   padding: 0;
   transition: transform 0.2s ease, background-color 0.2s ease;
   z-index: 10;
@@ -339,30 +389,105 @@ textarea {
   height: 18px;
 }
 
+.tags-selection {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.6rem 1rem;
+  background-color: #f0f0f0;
+  border: 1.5px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #555;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  flex: 1 0 auto;
+  min-width: 80px;
+  justify-content: center;
+}
+
+.checkbox-label input[type="checkbox"] {
+  display: none;
+}
+
+.checkbox-label:has(input:checked) {
+  background-color: #8873e6;
+  border-color: #8873e6;
+  color: white;
+  box-shadow: 0 2px 4px rgba(136, 115, 230, 0.3);
+}
+
+@media (hover: hover) {
+  .checkbox-label:hover {
+    border-color: #8873e6;
+    background-color: #f8f7ff;
+  }
+}
+
+.error-message {
+  padding: 0.75rem;
+  background-color: #ffebee;
+  color: #c62828;
+  border: 1px solid #ef5350;
+  border-radius: 8px;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
 .actions {
   display: flex;
-  gap: 10px;
-  margin-top: 30px;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-color);
 }
 
 .btn {
-  padding: 10px 20px;
+  flex: 1;
+  padding: 0.8rem 1.5rem;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
   text-decoration: none;
-  display: inline-block;
-  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
   transition: all 0.2s ease;
 }
 
 .btn-save {
-  background: #424cb8;
+  background: var(--primary-color);
   color: white;
+}
+
+.btn-save:hover:not(:disabled) {
+  background: #3d5aa8;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-save:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .btn-cancel {
   background: #999;
   color: white;
+}
+
+.btn-cancel:hover {
+  background: #888;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 </style>

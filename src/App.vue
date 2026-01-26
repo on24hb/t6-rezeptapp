@@ -3,6 +3,7 @@ import { useOfflineStore } from '@/stores/offlineStore'
 import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
 import { computed, ref } from 'vue'
+import gearSolidFull from '@/assets/Icons/gear-solid-full.svg'
 
 const authStore = useAuthStore()
 const route = useRoute()
@@ -46,6 +47,10 @@ const handleLogout = async () => {
       <div class="navbar-right">
         <RouterLink to="/add-recipe" class="btn-add mobile-add-btn" @click="closeMenu">
           ＋ Neues Rezept
+        </RouterLink>
+
+        <RouterLink to="/settings" class="settings-btn" @click="closeMenu" title="Einstellungen">
+          <img :src="gearSolidFull" alt="Einstellungen" class="settings-icon" />
         </RouterLink>
 
       <button class="menu-toggle" @click="toggleMenu" :class="{ 'active': isMenuOpen }">
@@ -105,6 +110,31 @@ const handleLogout = async () => {
   display: flex;
   align-items: center;
   gap: 1rem;
+}
+
+.settings-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  color: var(--primary-color);
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  text-decoration: none;
+  margin-left: auto;
+}
+
+.settings-icon {
+  width: 24px;
+  height: 24px;
+  filter: invert(26%) sepia(54%) saturate(730%) hue-rotate(221deg) brightness(99%) contrast(91%);
+}
+
+.settings-btn:hover {
+  transform: rotate(30deg);
+  opacity: 0.8;
 }
 
 .mobile-add-btn {

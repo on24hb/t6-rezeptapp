@@ -1,12 +1,22 @@
 <script setup lang="ts">
-defineProps<{
+import { useTagsStore } from '@/stores/tagsStore'
+import { computed } from 'vue'
+
+const tagsStore = useTagsStore()
+
+const props = defineProps<{
   tags?: string[]
 }>()
+
+const validTags = computed(() => {
+  if (!props.tags) return []
+  return props.tags.filter(tag => tagsStore.tags.includes(tag))
+})
 </script>
 
 <template>
-  <div v-if="tags && tags.length > 0" class="tags-container">
-    <span v-for="tag in tags" :key="tag" class="tag-badge">
+  <div v-if="validTags && validTags.length > 0" class="tags-container">
+    <span v-for="tag in validTags" :key="tag" class="tag-badge">
       {{ tag }}
     </span>
   </div>
