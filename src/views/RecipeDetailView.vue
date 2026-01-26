@@ -198,6 +198,9 @@ h1 {
   flex: 1;
   color: var(--primary-color);
   font-size: 2rem;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  min-width: 0;
 }
 
 .action-buttons {
