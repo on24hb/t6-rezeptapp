@@ -76,6 +76,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useRecipeStore } from '@/stores/recipeStore'
+import { compressImage } from '@/utils/imageUtils'
 import type { Recipe } from '@/types/Recipe'
 import heartSolidFull from '@/assets/Icons/heart-solid-full.svg'
 import heartRegularFull from '@/assets/Icons/heart-regular-full.svg'
@@ -94,36 +95,6 @@ const isCookingModeActive = ref(false)
 
 const triggerImageUpload = () => {
   fileInput.value?.click()
-}
-
-const compressImage = async (file: File, maxWidth = 1200, quality = 0.8): Promise<Blob> => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.readAsDataURL(file)
-    reader.onload = (event) => {
-      const img = new Image()
-      img.src = event.target?.result as string
-      img.onload = () => {
-        let width = img.width
-        let height = img.height
-        if (width > maxWidth) {
-          height = (height * maxWidth) / width
-          width = maxWidth
-        }
-        const canvas = document.createElement('canvas')
-        canvas.width = width
-        canvas.height = height
-        const ctx = canvas.getContext('2d')
-        ctx?.drawImage(img, 0, 0, width, height)
-        canvas.toBlob((blob) => {
-          if (blob) resolve(blob)
-          else reject(new Error('Error compressing image'))
-        }, 'image/jpeg', quality)
-      }
-      img.onerror = (err) => reject(err)
-    }
-    reader.onerror = (err) => reject(err)
-  })
 }
 
 const handleImageUpload = async (event: Event) => {
