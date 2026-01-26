@@ -107,6 +107,9 @@ const maxTime = 3600 // 60 Minuten
 const isTimerRunning = ref(false)
 let timerInterval: number | null = null
 
+// Audio-Objekt erstellen
+const timerSound = new Audio('/timer-end.mp3')
+
 const formatTime = (seconds: number) => {
   const m = Math.floor(seconds / 60)
   const s = seconds % 60
@@ -196,7 +199,7 @@ const toggleTimer = () => {
       if (timeLeft.value > 0) timeLeft.value--
       else {
         resetTimer()
-        alert('Zeit abgelaufen!')
+        timerSound.play().catch(err => console.log("Audio konnte nicht abgespielt werden:", err))
       }
     }, 1000)
   }
