@@ -64,13 +64,14 @@ const handleLogout = async () => {
             <button @click="handleLogout" class="btn-secondary">Abmelden</button>
         </div>
 
+        <RouterLink to="/add-recipe" class="nav-item btn-add desktop-add-btn" @click="closeMenu">
+          ＋ Neues Rezept
+        </RouterLink>
+
         <RouterLink to="/settings" class="settings-btn desktop-settings-btn" @click="closeMenu" title="Einstellungen">
           <img :src="gearSolidFull" alt="Einstellungen" class="settings-icon" />
         </RouterLink>
 
-        <RouterLink to="/add-recipe" class="nav-item btn-add desktop-add-btn" @click="closeMenu">
-          ＋ Neues Rezept
-        </RouterLink>
 
         <RouterLink to="/settings" class="nav-item mobile-settings-btn" @click="closeMenu">
           ⚙️ Einstellungen
