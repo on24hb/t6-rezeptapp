@@ -18,6 +18,8 @@ export default defineConfig({
         short_name: 'Rezept',
         description: 'A Progressive Web App for managing recipes',
         theme_color: '#ffffff',
+        display: 'standalone',
+        start_url: '/',
         icons: [
         {
           src: 'pwa-64x64.png',
@@ -38,7 +40,7 @@ export default defineConfig({
           purpose: 'any'
         },
         {
-          src: 'apple-touch-icon-180.png',
+          src: 'apple-touch-icon-180x180.png',
           sizes: '180x180',
           type: 'image/png'
         },
