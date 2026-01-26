@@ -194,6 +194,9 @@ h4 {
   margin: 0;
   color: var(--text-color);
   flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .favorite-btn {
