@@ -33,7 +33,7 @@ const handleLogout = async () => {
   <div class="app-layout">
     <!--Offline Banner-->
     <div v-if="!offlineStore.isOnline" class="offline-banner">
-      Du bist offline. Im Offline-Modus können keine neuen Rezepte erstellt werden.
+      Du bist offline. Im Offline-Modus können Rezepte nur angesehen werden.
     </div>
 
     <header class="app-bar" v-if="authStore.user && isNotLoginPage">
