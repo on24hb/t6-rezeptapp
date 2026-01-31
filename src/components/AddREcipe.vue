@@ -90,10 +90,10 @@ const handleImageUpload = async (event: Event) => {
 
       console.log('Komprimiere Bild...')
       const compressedBlob = await compressImage(originalFile)
-      
+
       console.log('Starte Upload...')
       const downloadUrl = await uploadImageFile(compressedBlob, originalFile.name)
-      
+
       imageUrl.value = downloadUrl
     } catch (err) {
       console.error('Upload fehlgeschlagen:', err)
@@ -123,11 +123,6 @@ const removeImage = async () => {
 const submit = async () => {
   validationError.value = ''
 
-  if (!navigator.onLine) {
-    alert('Du bist offline.')
-    return
-  }
-
   if (!title.value.trim()) {
     validationError.value = 'Bitte gib einen Rezeptnamen ein.'
     return
@@ -153,13 +148,13 @@ const submit = async () => {
     ingredients: ingredients.value,
     instructions: instructions.value,
     tags: selectedTags.value,
-    imageUrl: imageUrl.value || undefined,
+    imageUrl: undefined,
     createdAt: new Date(),
   })
 
   localStorage.removeItem(DRAFT_KEY)
   emit('saved')
-  
+
   title.value = ''
   ingredients.value = ''
   instructions.value = ''
@@ -204,7 +199,7 @@ const handleCancel = () => {
               <img :src="imageUrl" alt="Vorschau" class="image-preview" />
               <button type="button" @click="removeImage" class="remove-btn">Foto entfernen</button>
             </div>
-            
+
             <div v-else-if="!isUploading" class="camera-upload-prompt">
               <button type="button" @click="triggerFileInput" class="camera-icon-btn" title="Foto hinzufügen">
                 <svg class="camera-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
