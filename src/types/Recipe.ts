@@ -8,4 +8,5 @@ export interface Recipe {
   userId?: string;
   isFavorite?: boolean;
   imageUrl?: string;
+  isLocal?: boolean;
 }

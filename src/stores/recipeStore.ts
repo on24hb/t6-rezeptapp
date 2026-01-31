@@ -88,7 +88,12 @@ export const useRecipeStore = defineStore('recipeStore', () => {
     unsubscribe = onSnapshot(
       q,
       (snapshot) => {
-        recipes.value = snapshot.docs.map((d) => mapFirestoreDocToRecipe(d.id, d.data() as FirestoreRecipe));
+        recipes.value = snapshot.docs.map((d) => {
+          const rec = mapFirestoreDocToRecipe(d.id, d.data() as FirestoreRecipe) as Recipe & { isLocal?: boolean };
+          // Markieren von lokal erstellten/aktualisierten Rezepten
+          rec.isLocal = d.metadata.hasPendingWrites;
+          return rec;
+        });
         loading.value = false;
       },
       (error) => {

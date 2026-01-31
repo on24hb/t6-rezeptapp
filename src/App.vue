@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useOfflineStore } from '@/stores/offlineStore'
 import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
 import { computed, ref } from 'vue'
@@ -9,7 +8,6 @@ const authStore = useAuthStore()
 const route = useRoute()
 const router = useRouter()
 const isMenuOpen = ref(false)
-const offlineStore = useOfflineStore()
 
 const isNotLoginPage = computed(() => route.name !== 'login')
 
@@ -31,11 +29,6 @@ const handleLogout = async () => {
 
 <template>
   <div class="app-layout">
-    <!--Offline Banner-->
-    <div v-if="!offlineStore.isOnline" class="offline-banner">
-      Du bist offline. Im Offline-Modus können Rezepte nur angesehen werden.
-    </div>
-
     <header class="app-bar" v-if="authStore.user && isNotLoginPage">
         <RouterLink to="/" class="brand" @click="closeMenu">
         <img src="/pwa-64x64.png" alt="Logo" class="logo" width="32" height="32" />
