@@ -113,7 +113,7 @@ onMounted(async () => {
   const recipeId = route.params.id as string
   let found = recipeStore.recipes.find((r) => r.id === recipeId)
   if (!found) {
-    await recipeStore.fetchRecipesOnce()
+    recipeStore.fetchRecipesOnce()
     found = recipeStore.recipes.find((r) => r.id === recipeId)
   }
 
@@ -177,7 +177,7 @@ const removeImage = () => {
   formData.value = ({ ...formData.value, imageUrl: null } as FormRecipe)
 }
 
-const saveRecipe = async () => {
+const saveRecipe = () => {
   validationError.value = ''
 
   if (!recipe.value || !formData.value || !recipe.value.id) return
@@ -205,18 +205,19 @@ const saveRecipe = async () => {
         if (match && match[1]) {
           const storagePath = decodeURIComponent(match[1])
           const oldRef = sRef(storage, storagePath)
-          await deleteObject(oldRef)
-        }
-      } catch (e) { console.warn(e) }
-    }
+          // Nicht awaiten — Fehler werden geloggt, aber blockieren nicht den weiteren Ablauf.
+          deleteObject(oldRef).catch((e) => console.warn('Could not delete old image:', e))
+         }
+       } catch (e) { console.warn(e) }
+     }
 
-    const updateData = { ...formData.value } as unknown as Partial<Recipe>
-    await recipeStore.updateRecipe(recipe.value.id, updateData)
+     const updateData = { ...formData.value } as unknown as Partial<Recipe>
+    recipeStore.updateRecipe(recipe.value.id, updateData)
     router.push(`/recipe/${recipe.value.id}`)
-  } catch (err) {
-    console.error('Save error', err)
-    alert('Fehler beim Speichern des Rezepts')
-  }
+   } catch (err) {
+     console.error('Save error', err)
+     alert('Fehler beim Speichern des Rezepts')
+   }
 }
 </script>
 

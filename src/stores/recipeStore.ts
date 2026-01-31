@@ -182,31 +182,25 @@ export const useRecipeStore = defineStore('recipeStore', () => {
 
   const deleteRecipe = async (id: string) => {
     try {
-      // Zuerst das Bild aus dem Storage löschen, falls vorhanden
+      // Zuerst das Bild aus dem Storage löschen, falls vorhanden.
+      // Fehler beim Löschen des Bildes dürfen das weitere Löschen in Firestore nicht verhindern.
       const existing = recipes.value.find((r) => r.id === id);
       if (existing && existing.imageUrl && existing.imageUrl.startsWith('http')) {
-        try {
-          const downloadUrl = existing.imageUrl as string;
-          // Extrahiere den Pfad aus der Download-URL. Download-URLs enthalten '/o/<encoded-path>?'
-          const match = downloadUrl.match(/\/o\/([^?]+)/);
-          if (match && match[1]) {
-            const storagePath = decodeURIComponent(match[1]);
-            const oldRef = sRef(storage, storagePath);
-            await deleteObject(oldRef);
-            console.log('Altes Bild im Storage gelöscht (Pfad)');
-          } else {
-            // Fallback: versuche, die URL direkt zu verwenden
-            try {
-              const oldRef = sRef(storage, downloadUrl);
-              await deleteObject(oldRef);
-              console.log('Altes Bild im Storage gelöscht (URL-Fallback)');
-            } catch (innerErr) {
-              console.warn('Konnte altes Bild im Storage nicht löschen (Fallback):', innerErr);
-            }
-          }
-        } catch (err) {
-          console.warn('Konnte altes Bild im Storage nicht löschen:', err);
-          // Nicht kritisch, daher nur Warnung
+        const downloadUrl = existing.imageUrl as string;
+        // Extrahiere den Pfad aus der Download-URL. Download-URLs enthalten '/o/<encoded-path>?'
+        const match = downloadUrl.match(/\/o\/([^?]+)/);
+        if (match && match[1]) {
+          const storagePath = decodeURIComponent(match[1]);
+          const oldRef = sRef(storage, storagePath);
+          deleteObject(oldRef)
+            .then(() => console.log('Altes Bild im Storage gelöscht (Pfad)'))
+            .catch((err) => console.warn('Konnte altes Bild im Storage nicht löschen (Pfad):', err));
+        } else {
+          // Fallback: versuche, die URL direkt zu verwenden
+          const oldRef = sRef(storage, downloadUrl);
+          deleteObject(oldRef)
+            .then(() => console.log('Altes Bild im Storage gelöscht (URL-Fallback)'))
+            .catch((innerErr) => console.warn('Konnte altes Bild im Storage nicht löschen (Fallback):', innerErr));
         }
       }
 

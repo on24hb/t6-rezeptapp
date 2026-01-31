@@ -45,8 +45,12 @@ const router = createRouter({
 })
 
 // Navigation Guard
+// Use onAuthStateChanged but add a short timeout fallback to avoid blocking navigation
 router.beforeEach((to, from, next) => {
+  let handled = false;
   const unsubscribe = auth.onAuthStateChanged((user) => {
+    if (handled) return;
+    handled = true;
     unsubscribe();
     if (to.name !== 'login' && !user) {
       next({ name: 'login' });
@@ -56,5 +60,20 @@ router.beforeEach((to, from, next) => {
       next();
     }
   });
+
+  // Fallback: if auth doesn't respond quickly (e.g. offline), proceed after short timeout
+  setTimeout(() => {
+    if (handled) return;
+    handled = true;
+    try { unsubscribe(); } catch {}
+    const user = auth.currentUser;
+    if (to.name !== 'login' && !user) {
+      next({ name: 'login' });
+    } else if (to.name === 'login' && user) {
+      next({ name: 'home' });
+    } else {
+      next();
+    }
+  }, 150);
 });
 export default router

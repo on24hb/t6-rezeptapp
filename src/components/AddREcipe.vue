@@ -143,7 +143,7 @@ const submit = async () => {
     return
   }
 
-  await store.addRecipe({
+  store.addRecipe({
     title: title.value,
     ingredients: ingredients.value,
     instructions: instructions.value,
