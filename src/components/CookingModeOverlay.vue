@@ -41,6 +41,7 @@
 
       <Transition name="slide-up">
       <div v-if="showTimer" class="timer-panel">
+        <button class="timer-close" @click="showTimer = false" aria-label="Schließen">✕</button>
           <div class="radial-timer-container">
             <svg viewBox="0 0 100 100" class="radial-svg" @mousedown="startDragging" @mousemove="handleDragging" @mouseup="stopDragging" @mouseleave="stopDragging" @touchstart="startDragging" @touchmove="handleDragging" @touchend="stopDragging">
               <circle cx="50" cy="50" r="45" class="circle-bg" />
@@ -351,6 +352,7 @@ const prev = () => currentIndex.value > 0 ? currentIndex.value-- : null
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  font-size: 0.9rem;
 }
 
 .btn-toggle-ingredients:hover {
@@ -443,6 +445,7 @@ const prev = () => currentIndex.value > 0 ? currentIndex.value-- : null
   color: var(--primary-color);
   cursor: pointer;
   box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  font-size: 0.9rem;
 }
 
 .btn-toggle-timer.is-active {
@@ -470,7 +473,6 @@ const prev = () => currentIndex.value > 0 ? currentIndex.value-- : null
   width: 100%;
   height: 100%;
   cursor: pointer;
-  /* Rotation removed — time/handle math already accounts for 12 o'clock start */
 }
 
 .circle-bg {
@@ -523,4 +525,21 @@ const prev = () => currentIndex.value > 0 ? currentIndex.value-- : null
 .fade-enter-from, .fade-leave-to { opacity: 0; }
 .slide-up-enter-active, .slide-up-leave-active { transition: transform 0.3s ease-out; }
 .slide-up-enter-from, .slide-up-leave-to { transform: translate(-50%, 20px); opacity: 0; }
+
+.timer-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  color: #999;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.3s ease;
+}
+
+.timer-close:hover {
+  color: var(--primary-color);
+}
 </style>
