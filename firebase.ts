@@ -24,7 +24,7 @@ if (!firebaseConfig.apiKey) {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig)
 
-// Firestore mit Offline Persistence aktivieren (moderne Variante)
+// Firestore mit Offline Persistence aktivieren (IndexedDB)
 const db = initializeFirestore(app, {
   localCache: persistentLocalCache({
     tabManager: persistentMultipleTabManager()

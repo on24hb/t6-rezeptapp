@@ -36,11 +36,13 @@ onMounted(() => {
 
 const displayedRecipes = computed(() => props.recipes ?? recipeStore.recipes);
 
-const toggleFavorite = async (e: Event, recipe: Recipe) => {
+const toggleFavorite = (e: Event, recipe: Recipe) => {
   e.preventDefault();
   e.stopPropagation();
   if (recipe.id) {
-    await recipeStore.toggleFavorite(recipe.id);
+    // Optimistic UI: update immediately, fire-and-forget store update
+    recipe.isFavorite = !recipe.isFavorite;
+    recipeStore.toggleFavorite(recipe.id);
   }
 };
 </script>

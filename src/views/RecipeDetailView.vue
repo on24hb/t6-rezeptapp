@@ -154,11 +154,11 @@ onMounted(async () => {
   }
 })
 
-const confirmDelete = async () => {
+const confirmDelete = () => {
   if (!recipe.value?.id) return
   if (confirm('Möchtest du dieses Rezept wirklich löschen?')) {
     try {
-      await recipeStore.deleteRecipe(recipe.value.id)
+      recipeStore.deleteRecipe(recipe.value.id)
       router.push('/')
     } catch (err) {
       console.error('Delete error', err)
@@ -167,10 +167,10 @@ const confirmDelete = async () => {
   }
 }
 
-const toggleFavorite = async () => {
+const toggleFavorite = () => {
   if (!recipe.value?.id) return
   try {
-    await recipeStore.toggleFavorite(recipe.value.id)
+    recipeStore.toggleFavorite(recipe.value.id)
     if (recipe.value) {
       recipe.value.isFavorite = !recipe.value.isFavorite
     }
