@@ -111,6 +111,38 @@ let timerInterval: number | null = null
 // Audio-Objekt erstellen
 const timerSound = new Audio('/timer-end.mp3')
 
+// wake lock um das Gerät während des Kochmodus wach zu halten
+let wakeLock: WakeLockSentinel | null = null
+
+async function requestWakeLock() {
+  try {
+    if (!('wakeLock' in navigator)) return
+    if (wakeLock) return
+    const n = navigator as unknown as { wakeLock?: { request: (type: string) => Promise<WakeLockSentinel> } }
+    if (!n.wakeLock) throw new Error('wakeLock API not available')
+    wakeLock = await n.wakeLock.request('screen')
+    if (wakeLock && typeof wakeLock.addEventListener === 'function') {
+      wakeLock.addEventListener('release', () => {
+        wakeLock = null
+      })
+    }
+  } catch {
+    console.warn('Wake Lock request failed')
+  }
+}
+
+function releaseWakeLock() {
+  if (!wakeLock) return
+  wakeLock.release?.().catch(() => {})
+  wakeLock = null
+}
+
+const handleVisibilityChange = () => {
+  if (document.visibilityState === 'visible' && props.isOpen) {
+    requestWakeLock()
+  }
+}
+
 const formatTime = (seconds: number) => {
   const m = Math.floor(seconds / 60)
   const s = seconds % 60
@@ -216,8 +248,23 @@ const resetTimer = () => {
   timeLeft.value = 0
 }
 
-onUnmounted(() => { if (timerInterval) clearInterval(timerInterval) })
-watch(() => props.isOpen, (active) => { if (active) currentIndex.value = 0 })
+onUnmounted(() => {
+  if (timerInterval) clearInterval(timerInterval)
+  releaseWakeLock()
+  document.removeEventListener('visibilitychange', handleVisibilityChange)
+})
+
+// Überwache den Zustand des Overlays, um Wake Lock anzufordern/freizugeben
+watch(() => props.isOpen, async (active) => {
+  if (active) {
+    currentIndex.value = 0
+    await requestWakeLock()
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+  } else {
+    releaseWakeLock()
+    document.removeEventListener('visibilitychange', handleVisibilityChange)
+  }
+})
 
 const progress = computed(() => props.steps.length > 0 ? ((currentIndex.value + 1) / props.steps.length) * 100 : 0)
 const next = () => currentIndex.value < props.steps.length - 1 ? currentIndex.value++ : emit('close')
