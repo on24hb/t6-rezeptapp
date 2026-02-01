@@ -3,11 +3,14 @@ import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
 import { computed, ref } from 'vue'
 import gearSolidFull from '@/assets/Icons/gear-solid-full.svg'
+import { useOfflineStore } from '@/stores/offlineStore'
 
 const authStore = useAuthStore()
 const route = useRoute()
 const router = useRouter()
 const isMenuOpen = ref(false)
+
+const offlineStore = useOfflineStore()
 
 const isNotLoginPage = computed(() => route.name !== 'login')
 
@@ -29,6 +32,10 @@ const handleLogout = async () => {
 
 <template>
   <div class="app-layout">
+    <!--Offline Banner-->
+    <div v-if="!offlineStore.isOnline" class="offline-banner">
+      Du bist offline. Im Offline-Modus können keine Bilder hochgeladen werden.
+    </div>
     <header class="app-bar" v-if="authStore.user && isNotLoginPage">
         <RouterLink to="/" class="brand" @click="closeMenu">
         <img src="/pwa-64x64.png" alt="Logo" class="logo" width="32" height="32" />
