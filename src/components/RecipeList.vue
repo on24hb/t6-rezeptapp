@@ -14,7 +14,7 @@ const props = defineProps<{
   recipes?: Recipe[]
 }>();
 
-// Watch the user's uid so the watcher fires reliably when auth state changes
+// Auf Auth-Statusänderungen reagieren, um Rezepte zu laden oder zu leeren
 watch(
   () => authStore.user?.uid,
   (uid) => {
@@ -27,7 +27,7 @@ watch(
   { immediate: true }
 );
 
-// If parent didn't provide recipes, ensure we fetch on mount when already signed in
+// Wenn keine Rezepte als Props übergeben wurden, beim Mounten Rezepte laden
 onMounted(() => {
   if (!props.recipes && authStore.user?.uid) {
     recipeStore.fetchRecipes();
@@ -42,7 +42,8 @@ const toggleFavorite = (e: Event, recipe: Recipe) => {
   if (recipe.id) {
     // Optimistic UI: update immediately, fire-and-forget store update
     recipe.isFavorite = !recipe.isFavorite;
-    recipeStore.toggleFavorite(recipe.id);
+    // status aktualisieren im store
+    recipeStore.toggleFavorite(recipe.id, recipe.isFavorite);
   }
 };
 </script>

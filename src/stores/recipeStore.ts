@@ -225,10 +225,12 @@ export const useRecipeStore = defineStore('recipeStore', () => {
     recipes.value = [];
   };
 
-  const toggleFavorite = async (id: string) => {
+  // wenn newState übergeben wird, setze diesen Wert, sonst togglen
+  const toggleFavorite = async (id: string, newState?: boolean) => {
     const recipe = recipes.value.find((r) => r.id === id);
     if (!recipe) return;
-    await updateRecipe(id, { isFavorite: !recipe.isFavorite });
+    const target = typeof newState === 'boolean' ? newState : !recipe.isFavorite;
+    await updateRecipe(id, { isFavorite: target });
   };
 
 
