@@ -218,6 +218,7 @@ const handleCancel = () => {
             </div>
 
             <div v-if="imageUrl && !isUploading" class="preview-container">
+              <div class="image-wrapper">
               <img :src="imageUrl" alt="Vorschau" class="image-preview" />
               <button type="button" @click="removeImage" class="remove-btn">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="x-icon">
@@ -226,6 +227,7 @@ const handleCancel = () => {
                 </svg>
               </button>
             </div>
+          </div>
 
             <div v-else-if="!isUploading" class="camera-upload-prompt">
               <button type="button" @click="triggerFileInput" class="camera-icon-btn" title="Foto hinzufügen">
@@ -450,6 +452,12 @@ textarea::placeholder {
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin-top: 1rem;
+}
+
+.image-wrapper {
+  position: relative;
+  display: inline-block;
 }
 
 .image-preview {
@@ -463,19 +471,33 @@ textarea::placeholder {
 }
 
 .remove-btn {
-  margin-top: 0.75rem;
-  background-color: #ff5252;
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #da6834;
   color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
+  border: 2px solid white;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
   cursor: pointer;
-  font-size: 0.9rem;
-  transition: background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 0;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+  z-index: 10;
 }
 
 .remove-btn:hover {
-  background-color: #ff3838;
+  transform: scale(1.1);
+  background: #f37f49;
+}
+
+.x-icon {
+  width: 18px;
+  height: 18px;
 }
 
 input:focus,

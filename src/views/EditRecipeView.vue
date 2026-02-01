@@ -24,6 +24,7 @@
         </div>
 
         <div v-if="formData && formData.imageUrl && !isUploading" class="preview-container">
+          <div class="image-wrapper">
           <img :src="formData.imageUrl" alt="Vorschau" class="image-preview" />
           <button type="button" @click="removeImage" class="remove-btn" title="Foto entfernen">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="x-icon">
@@ -32,6 +33,7 @@
             </svg>
           </button>
         </div>
+        </div>
         <div v-else-if="!isUploading" class="camera-upload-prompt">
           <button type="button" @click="triggerFileInput" class="camera-icon-btn" title="Foto hinzufügen">
              <svg class="camera-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><path d="M213.1 128.8L202.7 160L128 160C92.7 160 64 188.7 64 224L64 480C64 515.3 92.7 544 128 544L512 544C547.3 544 576 515.3 576 480L576 224C576 188.7 547.3 160 512 160L437.3 160L426.9 128.8C420.4 109.2 402.1 96 381.4 96L258.6 96C237.9 96 219.6 109.2 213.1 128.8zM320 256C373 256 416 299 416 352C416 405 373 448 320 448C267 448 224 405 224 352C224 299 267 256 320 256z"/></svg>
@@ -39,7 +41,6 @@
           <p class="upload-text">Foto hinzufügen</p>
         </div>
       </div>
-
       <div class="form-group">
         <label for="ingredients">Zutaten</label>
         <textarea v-model="formData.ingredients" id="ingredients" required></textarea>
@@ -407,6 +408,11 @@ textarea {
   align-items: center;
 }
 
+.image-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
 .image-preview {
   max-width: 100%;
   max-height: 300px;
@@ -417,8 +423,8 @@ textarea {
 
 .remove-btn {
   position: absolute;
-  top: -10px;
-  right: -10px;
+  top: 8px;
+  right: 8px;
   background: #da6834;
   color: white;
   border: 2px solid white;
