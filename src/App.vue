@@ -32,7 +32,7 @@ const handleLogout = async () => {
     <header class="app-bar" v-if="authStore.user && isNotLoginPage">
         <RouterLink to="/" class="brand" @click="closeMenu">
         <img src="/pwa-64x64.png" alt="Logo" class="logo" width="32" height="32" />
-        <span class="app-title">RezeptBuddy</span>
+        <span class="app-title">Little Chef</span>
       </RouterLink>
 
       <div class="navbar-right">

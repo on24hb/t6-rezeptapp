@@ -16,11 +16,11 @@ const filterFavorites = ref(false)
 const filteredRecipes = computed(() => {
   return store.recipes.filter(recipe => {
     const matchesSearch = recipe.title.toLowerCase().includes(searchTerm.value.toLowerCase())
-    
+
     const matchesTag = filterTag.value ? recipe.tags?.includes(filterTag.value) : true
-    
+
     const matchesFavorite = filterFavorites.value ? recipe.isFavorite : true
-    
+
     return matchesSearch && matchesTag && matchesFavorite
   })
 })
@@ -28,16 +28,16 @@ const filteredRecipes = computed(() => {
 
 <template>
   <header class="home-header">
-    <h1>Rezept-App</h1>
-    <p>Willkommen in der Rezept-App! Hier kannst du deine Lieblingsrezepte verwalten.</p>
+    <h1>Little Chef</h1>
+    <p>Willkommen in deiner Rezept-App! Hier kannst du deine Lieblingsrezepte verwalten.</p>
   <div class="search-bar">
-      <input 
-        v-model="searchTerm" 
-        type="text" 
-        placeholder="Suche nach Rezepten..." 
+      <input
+        v-model="searchTerm"
+        type="text"
+        placeholder="Suche nach Rezepten..."
         class="search-input"
       />
-      
+
       <select v-model="filterTag" class="filter-select">
         <option value="">Alle Kategorien</option>
         <option v-for="tag in tagsStore.tags" :key="tag" :value="tag">
@@ -45,15 +45,15 @@ const filteredRecipes = computed(() => {
         </option>
       </select>
 
-      <button 
+      <button
         @click="filterFavorites = !filterFavorites"
         class="filter-btn"
         :class="{ active: filterFavorites }"
         :title="filterFavorites ? 'Zeige alle Rezepte' : 'Zeige nur Favoriten'"
       >
-        <img 
-          :src="heartSolidFull" 
-          alt="Herz" 
+        <img
+          :src="heartSolidFull"
+          alt="Herz"
           class="heart-icon-filter"
           :class="{ active: filterFavorites }"
         />

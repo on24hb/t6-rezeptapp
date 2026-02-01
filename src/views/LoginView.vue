@@ -29,7 +29,7 @@ const handleGuestLogin = async () => {
       <div class="logo-circle">
         <img src="../../logo.png" class="login-logo" alt="Logo" width="64" />
       </div>
-      <h1>RezeptBuddy</h1>
+      <h1>Little Chef</h1>
       <p>Deine Rezepte, immer dabei.</p>
 
       <div class="actions">

@@ -26,8 +26,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon-180x180.png', 'pwa-64x64.png', 'pwa-192x192.png', 'pwa-512x512.png', 'maskable-icon-512x512.png'],
       manifest: {
-        name: 'Rezept App',
-        short_name: 'Rezept',
+        name: 'LittleChef',
+        short_name: 'LittleChef',
         description: 'A Progressive Web App for managing recipes',
         lang: 'de',
         scope: '/',
