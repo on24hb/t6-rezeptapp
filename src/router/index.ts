@@ -5,7 +5,7 @@ import RecipeDetailView from '../views/RecipeDetailView.vue'
 import EditRecipeView from '../views/EditRecipeView.vue'
 import LoginView from '../views/LoginView.vue'
 import SettingsView from '../views/SettingsView.vue'
-import { auth } from '../../firebase'
+import { auth, authReady } from '../../firebase'
 
 
 const router = createRouter({
@@ -45,35 +45,19 @@ const router = createRouter({
 })
 
 // Navigation Guard
-// Use onAuthStateChanged but add a short timeout fallback to avoid blocking navigation
-router.beforeEach((to, from, next) => {
-  let handled = false;
-  const unsubscribe = auth.onAuthStateChanged((user) => {
-    if (handled) return;
-    handled = true;
-    unsubscribe();
-    if (to.name !== 'login' && !user) {
-      next({ name: 'login' });
-    } else if (to.name === 'login' && user) {
-      next({ name: 'home' });
-    } else {
-      next();
-    }
-  });
-
-  // Fallback: if auth doesn't respond quickly (e.g. offline), proceed after short timeout
-  setTimeout(() => {
-    if (handled) return;
-    handled = true;
-    try { unsubscribe(); } catch {}
-    const user = auth.currentUser;
-    if (to.name !== 'login' && !user) {
-      next({ name: 'login' });
-    } else if (to.name === 'login' && user) {
-      next({ name: 'home' });
-    } else {
-      next();
-    }
-  }, 150);
-});
+// mit firebase authReady prüfen, ob der Nutzer authentifiziert ist, bevor er auf geschützte Routen zugreift
+router.beforeEach(async (to, from, next) => {
+  // Warten, bis der anfängliche Authentifizierungsstatus bekannt ist
+  try {
+    await authReady
+  } catch {}
+  const user = auth.currentUser
+  if (to.name !== 'login' && !user) {
+    next({ name: 'login' })
+  } else if (to.name === 'login' && user) {
+    next({ name: 'home' })
+  } else {
+    next()
+  }
+})
 export default router

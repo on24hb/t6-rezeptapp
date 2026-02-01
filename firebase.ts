@@ -1,7 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from 'firebase/app'
 import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from 'firebase/firestore'
-import { getAuth } from "firebase/auth";
+import { getAuth, setPersistence, browserLocalPersistence } from "firebase/auth";
 import { getStorage } from "firebase/storage";
 
 // Firebase configuration is loaded from environment variables (Vite requires VITE_ prefix)
@@ -34,7 +34,20 @@ const db = initializeFirestore(app, {
 // Authentifizierung mit der App-Instanz verknüpfen
 const auth = getAuth(app);
 
+// Stelle sicher, dass Auth im Browser lokal persistiert wird (kein Ausloggen nach Reload)
+setPersistence(auth, browserLocalPersistence).catch(() => {
+  // Wenn Browser die Persistence nicht unterstützt, ignorieren wir den Fehler — Standardverhalten bleibt
+});
+
+// Promise, die sich beim ersten onAuthStateChanged auflöst (initialer Auth-Status bekannt)
+const authReady: Promise<unknown> = new Promise((resolve) => {
+  const unsub = auth.onAuthStateChanged((user) => {
+    unsub();
+    resolve(user);
+  });
+});
+
 // Exportieren
-export { db, auth }
+export { db, auth, authReady }
 export const storage = getStorage(app);
 

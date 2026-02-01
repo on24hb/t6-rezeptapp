@@ -113,7 +113,8 @@ onMounted(async () => {
   const recipeId = route.params.id as string
   let found = recipeStore.recipes.find((r) => r.id === recipeId)
   if (!found) {
-    recipeStore.fetchRecipesOnce()
+    // sicherstellen, dass Rezepte geladen sind, damit das Rezept gefunden werden kann
+    await recipeStore.fetchRecipesOnce()
     found = recipeStore.recipes.find((r) => r.id === recipeId)
   }
 
