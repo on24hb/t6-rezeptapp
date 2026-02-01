@@ -213,6 +213,18 @@ const saveRecipe = () => {
      }
 
      const updateData = { ...formData.value } as unknown as Partial<Recipe>
+
+     // Optimistic local update: Änderungen sofort in der UI sichtbar machen
+     if (recipe.value) {
+       if (updateData.title !== undefined) recipe.value.title = updateData.title as string
+       if (updateData.ingredients !== undefined) recipe.value.ingredients = updateData.ingredients as string
+       if (updateData.instructions !== undefined) recipe.value.instructions = updateData.instructions as string
+       if (updateData.tags !== undefined) recipe.value.tags = updateData.tags as string[]
+       // imageUrl: represent null as undefined in the in-memory object
+       if (updateData.imageUrl !== undefined) recipe.value.imageUrl = updateData.imageUrl === null ? undefined : (updateData.imageUrl as string)
+     }
+
+    // Fire-and-forget update to Firestore (wird später durch onSnapshot synchronisiert)
     recipeStore.updateRecipe(recipe.value.id, updateData)
     router.push(`/recipe/${recipe.value.id}`)
    } catch (err) {

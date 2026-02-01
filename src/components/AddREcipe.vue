@@ -34,12 +34,15 @@ const createDebounce = (fn: () => void, delay: number) => {
 }
 
 const saveDraft = () => {
-  const draftData = {
+  const draftData: Record<string, unknown> = {
     title: title.value,
     ingredients: ingredients.value,
     instructions: instructions.value,
-    selectedTags: selectedTags.value,
-    imageUrl: imageUrl.value
+    selectedTags: selectedTags.value
+  }
+  // Only persist image URL if it's an actual uploaded (http) URL — not a transient blob URL
+  if (imageUrl.value && imageUrl.value.startsWith('http')) {
+    draftData.imageUrl = imageUrl.value
   }
   localStorage.setItem(DRAFT_KEY, JSON.stringify(draftData))
 }
@@ -59,7 +62,8 @@ onMounted(() => {
       if (parsed.ingredients) ingredients.value = parsed.ingredients
       if (parsed.instructions) instructions.value = parsed.instructions
       if (parsed.selectedTags) selectedTags.value = parsed.selectedTags
-      if (parsed.imageUrl) imageUrl.value = parsed.imageUrl
+      // nur laden, wenn es eine echte URL ist (kein blob URL) - sonst wird das Bild nicht angezeigt
+      if (parsed.imageUrl && typeof parsed.imageUrl === 'string' && parsed.imageUrl.startsWith('http')) imageUrl.value = parsed.imageUrl
     } catch (e) {
       console.error('Fehler beim Laden des Entwurfs', e)
     }
@@ -109,13 +113,25 @@ const handleImageUpload = async (event: Event) => {
 const removeImage = async () => {
   if (!imageUrl.value) return
   const urlToDelete = imageUrl.value
-  if (urlToDelete.startsWith('http')) {
-    try {
-      const storageRef = sRef(storage, urlToDelete)
-      await deleteObject(storageRef)
-    } catch (err) {
-      console.error('Löschen fehlgeschlagen:', err)
+  try {
+    // wenn es eine Blob-URL ist, einfach widerrufen
+    if (urlToDelete.startsWith('blob:')) {
+      try { URL.revokeObjectURL(urlToDelete) } catch {}
+    } else if (urlToDelete.startsWith('http')) {
+      // Versuche, den Speicherpfad aus der Firebase-Download-URL zu extrahieren
+      const match = urlToDelete.match(/\/o\/([^?]+)/)
+      if (match && match[1]) {
+        const storagePath = decodeURIComponent(match[1])
+        const storageRef = sRef(storage, storagePath)
+        await deleteObject(storageRef).catch((err) => console.warn('Konnte Bild nicht löschen:', err))
+      } else {
+        // Fallback: try using the full URL as ref
+        const storageRef = sRef(storage, urlToDelete)
+        await deleteObject(storageRef).catch((err) => console.warn('Konnte Bild nicht löschen (fallback):', err))
+      }
     }
+  } catch (err) {
+    console.error('Löschen fehlgeschlagen:', err)
   }
   imageUrl.value = null
 }
@@ -143,12 +159,18 @@ const submit = async () => {
     return
   }
 
+  // verhindern, dass ein Blob-URL gespeichert wird (weil das Bild dann nicht mehr verfügbar ist)
+  if (imageUrl.value && imageUrl.value.startsWith('blob:')) {
+    alert('Bitte lade das Bild erneut hoch, bevor du das Rezept speicherst.')
+    return
+  }
+
   store.addRecipe({
     title: title.value,
     ingredients: ingredients.value,
     instructions: instructions.value,
     tags: selectedTags.value,
-    imageUrl: undefined,
+    imageUrl: imageUrl.value || undefined,
     createdAt: new Date(),
   })
 
@@ -197,7 +219,12 @@ const handleCancel = () => {
 
             <div v-if="imageUrl && !isUploading" class="preview-container">
               <img :src="imageUrl" alt="Vorschau" class="image-preview" />
-              <button type="button" @click="removeImage" class="remove-btn">Foto entfernen</button>
+              <button type="button" @click="removeImage" class="remove-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="x-icon">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
             </div>
 
             <div v-else-if="!isUploading" class="camera-upload-prompt">

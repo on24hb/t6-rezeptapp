@@ -129,12 +129,23 @@ export const useRecipeStore = defineStore('recipeStore', () => {
     }
 
     try {
+      // blob:-URLs dürfen nicht gespeichert werden, da sie nur temporär sind
+      let imageUrlToStore: string | null = null
+      if (recipe.imageUrl && typeof recipe.imageUrl === 'string') {
+        if (recipe.imageUrl.startsWith('blob:')) {
+          console.warn('Versuche, temporäre blob-URL als Bild zu speichern; wird ignoriert.');
+          imageUrlToStore = null
+        } else {
+          imageUrlToStore = recipe.imageUrl
+        }
+      }
+
       await addDoc(collection(db, 'recipes'), {
         ...recipe,
         tags: recipe.tags || [],
         userId: auth.currentUser.uid,
         isFavorite: false,
-        imageUrl: recipe.imageUrl || null,
+        imageUrl: imageUrlToStore || null,
         createdAt: serverTimestamp()
       });
     } catch (error) {
@@ -162,23 +173,29 @@ export const useRecipeStore = defineStore('recipeStore', () => {
         payload.imageUrl = updates.imageUrl;
       }
 
-      await updateDoc(recipeRef, payload as UpdateData<DocumentData>);
-
+      // Optimistic local update: update the in-memory recipe object first so UI updates immediately
       const index = recipes.value.findIndex((r) => r.id === id);
       if (index !== -1) {
-        const existing = recipes.value[index];
-        const updated = { ...existing } as Recipe;
-
-        if (updates.title !== undefined) updated.title = updates.title;
-        if (updates.ingredients !== undefined) updated.ingredients = updates.ingredients!;
-        if (updates.instructions !== undefined) updated.instructions = updates.instructions!;
-        if (updates.createdAt !== undefined) updated.createdAt = updates.createdAt as Date;
-        if (updates.tags !== undefined) updated.tags = updates.tags;
-        if (updates.userId !== undefined) updated.userId = updates.userId;
-        if (updates.isFavorite !== undefined) updated.isFavorite = updates.isFavorite;
-        if (updates.imageUrl !== undefined) updated.imageUrl = updates.imageUrl;
-        recipes.value[index] = updated;
+        const maybeExisting = recipes.value[index]
+        if (maybeExisting) {
+          const existing = maybeExisting as Recipe & { isLocal?: boolean }
+          if (updates.title !== undefined) existing.title = updates.title as string
+          if (updates.ingredients !== undefined) existing.ingredients = updates.ingredients as string
+          if (updates.instructions !== undefined) existing.instructions = updates.instructions as string
+          if (updates.createdAt !== undefined) existing.createdAt = updates.createdAt as Date
+          if (updates.tags !== undefined) existing.tags = updates.tags as string[]
+          if (updates.userId !== undefined) existing.userId = updates.userId as string
+          if (updates.isFavorite !== undefined) existing.isFavorite = updates.isFavorite as boolean
+          if (updates.imageUrl !== undefined) existing.imageUrl = updates.imageUrl === null ? undefined : (updates.imageUrl as string)
+          // Mark as local pending write so UI components can show a pending indicator if desired
+          existing.isLocal = true
+          // Replace to trigger reactivity
+          recipes.value.splice(index, 1, existing)
+        }
       }
+
+      // Perform Firestore update (fire-and-forget semantics for optimistic UI)
+      await updateDoc(recipeRef, payload as UpdateData<DocumentData>);
     } catch (error) {
       console.error('Error updating recipe:', error);
       throw error;
