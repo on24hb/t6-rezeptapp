@@ -1,48 +1,34 @@
-# t6-rezeptapp
+# PWA LittleChef
 
-This template should help get you started developing with Vue 3 in Vite.
+Die vorliegende Progressive Web App wurde mittels Vite, Vue 3 (inkl. Pinia und Vue Router) und Firebase umgesetzt.
+Die App erfüllt die PWA-Standards (Bemerkungen dazu, jeweils nachzulesen im ON24-4:T6 Planungsdokument / “App-Steckbrief”).
 
-## Recommended IDE Setup
+## Weitere Hinweise zur App:
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+Zu Beginn des Projekts wurden die Firebase-Zugangsdaten fälschlicherweise direkt in das Git-Repository hochgeladen.
+Nachdem wir das Sicherheitsrisiko erkannt haben, wurde dies korrigiert:
 
-## Recommended Browser Setup
+Die Daten wurden in eine .env Datei ausgelagert.
+Die .env-Datei wurde in die .gitignore aufgenommen. → Die Zugangsdaten werden nun separat mitgeliefert,
+damit die App lokal lauffähig bleibt, ohne Keys öffentlich zu exponieren.
+Die API-Keys in Firebase wurden in der Google Konsole so eingeschränkt, dass sie nur von der autorisierten
+Domain der App genutzt werden können.
 
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
+Sollte das Git Repository (https://github.com/on24hb/t6-rezeptapp.git) geklont werden, muss manuell
+eine .env Datei ergänzt werden (wird zur Prüfung in einem seperaten Dokument mitgeliefert.)
 
-## Type Support for `.vue` Imports in TS
+## Befehle zum Starten der Anwendung manuell in VS Code:
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
-
-## Customize configuration
-
-See [Vite Configuration Reference](https://vite.dev/config/).
-
-## Project Setup
-
-```sh
 npm install
-```
-
-### Compile and Hot-Reload for Development
-
-```sh
-npm run dev
-```
-
-### Type-Check, Compile and Minify for Production
-
-```sh
 npm run build
-```
+npm run preview
 
-### Lint with [ESLint](https://eslint.org/)
+oder alternativ (Entwicklungsmodus):
+npm install
+npm run dev
 
-```sh
-npm run lint
-```
+In der Firebase Konsole wurden zudem Regeln für die Datenbank sowie den Storage festgelegt,
+damit nur authentifizierte Nutzer Zugriff auf die Daten haben. Für den Storage wurde zudem die Dateiuploadgröße
+auf 7MB beschränkt (könnte vermutlich noch weiter heruntergesetzt werden).
+
+### Für technische Dokumentation siehe Vortragsmaterialien.
